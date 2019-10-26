@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "818774674092",
+    "firebase_url": "https://monumentsguid.firebaseio.com",
+    "project_id": "monumentsguid",
+    "storage_bucket": "monumentsguid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818774674092:android:1b87f715a51349f7ccad09",
+        "android_client_info": {
+          "package_name": "com.example.monumentsguid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "818774674092-43cp4taai55pcopuvnmc30tkmrvlg0t7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-n0fl3pq0Vsj738tqqskF3YSccNsWW6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "818774674092-43cp4taai55pcopuvnmc30tkmrvlg0t7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
