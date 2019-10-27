@@ -20,7 +20,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -29,15 +28,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.Objects;
-
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
-    private CameraPosition mCameraPosition;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -59,15 +57,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    private ClusterManager<ClusterItem> mClusterManager;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Retrieve location and camera position from saved instance state.
+        // Retrieve location from saved instance state.
         if (savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
         setContentView(R.layout.activity_maps);
 
@@ -108,25 +109,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // dodaje markery zabytkow na mape (pobiera z bazy)
-        db.collection("observation_point")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                String title = document.getString("name");
-                                double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
-                                double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
-                                addMarkerOnMap(lat, lng, title);
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
+        mClusterManager = new ClusterManager<>(this, mMap);
+        mClusterManager.setRenderer(new MarkerClusterRenderer(this, mMap, mClusterManager));
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnInfoWindowClickListener(mClusterManager);
+        addClusterItems();
+        mClusterManager.cluster();
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             @Override
@@ -158,6 +147,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+    }
+
+
+    private void addClusterItems() {
+
+        // dodaje markery zabytkow na mape (pobiera z bazy)
+        db.collection("observation_point")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                String title = document.getString("name");
+                                String comment = document.getString("comment");
+                                double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
+                                double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
+                                //addMarkerOnMap(lat, lng, title);
+                                mClusterManager.addItem(new ClusterItem(lat, lng, title, comment));
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
     }
 
     /**
