@@ -19,12 +19,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Objects;
 
@@ -52,6 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Keys for storing activity state.
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     @Override
@@ -102,13 +108,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // dodaje markery zabytkow
-        double lat = 51.098333;
-        double lng = 17.037222;
-        String title = "Dworzec Główny";
-
-        addMarkerOnMap(lat, lng, title);
-
+        // dodaje markery zabytkow na mape (pobiera z bazy)
+        db.collection("observation_point")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                String title = document.getString("name");
+                                double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
+                                double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
+                                addMarkerOnMap(lat, lng, title);
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             @Override
@@ -147,7 +165,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     public void addMarkerOnMap(double lat, double lng, String title) {
         LatLng object = new LatLng(lat, lng);
-        mMap.addMarker(new MarkerOptions().position(object).title(title));
+        mMap.addMarker(new MarkerOptions()
+                .position(object)
+                .title(title)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.pinezka)));
     }
 
 
@@ -209,7 +230,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
-                                Log.d(TAG, "To jest to");
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
