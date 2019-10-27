@@ -103,27 +103,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // dodaje markery zabytkow
-        LatLng dworzecGl = new LatLng(51.098333, 17.037222);
-        LatLng hotelPiastIGrand = new LatLng(51.099967, 17.035933);
-        LatLng teatrCapitol = new LatLng(51.101101, 17.030059);
-        LatLng ratusz = new LatLng(51.109429, 17.032549);
-        LatLng kosciolSwElzbiety = new LatLng(51.111541, 17.030456);
-        LatLng uniwersytetWr = new LatLng(51.113991, 17.033909);
-        LatLng katedraSwJanaChrzciciela = new LatLng(51.114209, 17.046435);
-        LatLng muzeumNarodowe = new LatLng(51.110838, 17.047690);
-        LatLng mostGrunwalzki = new LatLng(51.109725, 17.053613);
-        LatLng halaStulecia = new LatLng(51.106811, 17.077089);
+        double lat = 51.098333;
+        double lng = 17.037222;
+        String title = "Dworzec Główny";
 
-        mMap.addMarker(new MarkerOptions().position(dworzecGl).title("Dworzec Główny"));
-        mMap.addMarker(new MarkerOptions().position(hotelPiastIGrand).title("Hotel Piast i Grand Hotel"));
-        mMap.addMarker(new MarkerOptions().position(teatrCapitol).title("Teatr Capitol"));
-        mMap.addMarker(new MarkerOptions().position(ratusz).title("Ratusz"));
-        mMap.addMarker(new MarkerOptions().position(kosciolSwElzbiety).title("Kościół Św. Elżbiety"));
-        mMap.addMarker(new MarkerOptions().position(uniwersytetWr).title("Uniwersytet Wrocławski"));
-        mMap.addMarker(new MarkerOptions().position(katedraSwJanaChrzciciela).title("Katedra Św. Jana Chczciciela"));
-        mMap.addMarker(new MarkerOptions().position(muzeumNarodowe).title("Muzeum Narodowe"));
-        mMap.addMarker(new MarkerOptions().position(mostGrunwalzki).title("Most Grunwldzki"));
-        mMap.addMarker(new MarkerOptions().position(halaStulecia).title("Hala Stulecia"));
+        addMarkerOnMap(lat, lng, title);
+
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             @Override
@@ -155,6 +140,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+    }
+
+    /**
+     * Dodaje na mape pinezke z pobranymi z BD danymi (punkt obserwacji, zabytek itd).
+     */
+    public void addMarkerOnMap(double lat, double lng, String title) {
+        LatLng object = new LatLng(lat, lng);
+        mMap.addMarker(new MarkerOptions().position(object).title(title));
     }
 
 
@@ -201,6 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * Gets the current location of the device, and positions the map's camera.
      */
     private void getDeviceLocation() {
+
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
@@ -215,14 +209,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                Log.d(TAG, "To jest to");
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory
+                            mMap.animateCamera(CameraUpdateFactory
                                     .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
