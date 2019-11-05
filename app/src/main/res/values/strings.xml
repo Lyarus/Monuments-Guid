@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Monuments Guid</string>
     <string name="title_activity_maps">Map</string>
+    <string name="info">Info</string>
+    <string name="wybierz">Wybierz</string>
+    <string name="menu">Menu</string>
 </resources>

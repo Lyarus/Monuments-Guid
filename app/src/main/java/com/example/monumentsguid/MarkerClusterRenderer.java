@@ -18,12 +18,13 @@ public class MarkerClusterRenderer extends DefaultClusterRenderer<ClusterItem> {
     private final Context mContext;
     private final IconGenerator mClusterIconGenerator;
 
-    public MarkerClusterRenderer(Context context, GoogleMap map, com.google.maps.android.clustering.ClusterManager<ClusterItem> clusterManager) {
+    MarkerClusterRenderer(Context context, GoogleMap map, com.google.maps.android.clustering.ClusterManager<ClusterItem> clusterManager) {
         super(context, map, clusterManager);
         mContext = context;
         mClusterIconGenerator = new IconGenerator(mContext.getApplicationContext());
     }
 
+    // tworzy widok pinezki zabytka
     @Override
     protected void onBeforeClusterItemRendered(ClusterItem item, MarkerOptions markerOptions) {
 
@@ -31,6 +32,7 @@ public class MarkerClusterRenderer extends DefaultClusterRenderer<ClusterItem> {
         markerOptions.icon(markerDescriptor).snippet(item.getSnippet());
     }
 
+    // tworzy widok pinezki clustera
     @Override
     protected void onBeforeClusterRendered(Cluster<ClusterItem> cluster,
                                            MarkerOptions markerOptions) {
