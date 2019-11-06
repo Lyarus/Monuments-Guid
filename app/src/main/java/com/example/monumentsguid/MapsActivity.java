@@ -96,18 +96,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //pobiera rozmiar ekranu urzadzenia
+        // Pobiera rozmiar ekranu urzadzenia
         screenHeight = getResources().getDisplayMetrics().heightPixels;
         screenWidth = getResources().getDisplayMetrics().widthPixels;
+
+        // Definiuje wszystkie obiekty
+        setContentView(R.layout.activity_maps);
+        btnInfo = findViewById(R.id.btn_info);
+        btnWybierz = findViewById(R.id.btn_wybierz);
+        btnMenu = findViewById(R.id.btn_menu);
 
         // Retrieve location from saved instance state.
         if (savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
         }
-        setContentView(R.layout.activity_maps);
-        btnInfo = findViewById(R.id.btn_info);
-        btnWybierz = findViewById(R.id.btn_wybierz);
-        btnMenu = findViewById(R.id.btn_menu);
+
 
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -146,6 +149,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+
+        // Reaguje na klikniecie na mape
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng point) {
+                btnInfo.setVisibility(View.INVISIBLE);
+                btnWybierz.setVisibility(View.INVISIBLE);
+            }
+        });
 
         // Definiuje przycisk Menu
         ViewGroup.LayoutParams paramsMenu = btnMenu.getLayoutParams();
@@ -157,6 +170,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Toast.makeText(MapsActivity.this, "Menu", Toast.LENGTH_LONG).show();
             }
         });
+
+        // Ustawienia lokalizacji urzadzenia
+        getLocationPermission();
+        updateLocationUI();
+        mOrigin = getMyLocation();
+        if (mOrigin != null) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
+        }
 
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
         mClusterManager = new ClusterManager<>(this, mMap);
@@ -170,20 +191,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Buduje okno informacyjne
         CustomInfoWindowGoogleMap customInfoWindowGoogleMap = new CustomInfoWindowGoogleMap(getApplicationContext());
         mMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
-
-        // Ustawienia lokalizacji urzadzenia
-        getLocationPermission();
-        updateLocationUI();
-        getMyLocation();
-
-        // Reaguje na klikniecie na mape
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng point) {
-                btnInfo.setVisibility(View.INVISIBLE);
-                btnWybierz.setVisibility(View.INVISIBLE);
-            }
-        });
     }
 
     /**
@@ -200,8 +207,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 final String title = document.getString("name");
                                 String comment = document.getString("comment");
                                 final String description = document.getString("description");
-                                double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
-                                double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
+                                final double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
+                                final double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
                                 mClusterManager.addItem(new ClusterItem(lat, lng, title, comment, description));
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                 mClusterManager.setOnClusterItemInfoWindowClickListener(
@@ -230,7 +237,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 btnWybierz.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View v) {
-                                                        Toast.makeText(MapsActivity.this, "Wybrano: " + title, Toast.LENGTH_LONG).show();
+                                                        getMyLocation();
+                                                        mDestination = new LatLng(lat, lng);
+                                                        if (mOrigin != null) {
+                                                            Toast.makeText(MapsActivity.this, "Wybrano: " + mOrigin.latitude + ":" + mOrigin.longitude + " / " + mDestination.latitude + ";" + mDestination.longitude, Toast.LENGTH_LONG).show();
+                                                            drawRoute();
+                                                        }
                                                     }
                                                 });
                                                 btnWybierz.setVisibility(View.VISIBLE);
@@ -282,7 +294,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    private void getMyLocation() {
+    private LatLng getMyLocation() {
         // Getting LocationManager object from System Service LOCATION_SERVICE
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -290,7 +302,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onLocationChanged(Location location) {
                 mOrigin = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, 12));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
                 if (mOrigin != null && mDestination != null) {
                     drawRoute();
                 }
@@ -325,7 +337,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
                                 mOrigin = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
                             }
 
                         } else {
@@ -341,6 +352,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (SecurityException e) {
             Log.e("Exception: %s", Objects.requireNonNull(e.getMessage()));
         }
+        return mOrigin;
     }
 
     /**
@@ -429,7 +441,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Key
         String key = "key=" + getString(R.string.google_maps_key);
         // Building the parameters to the web service
-        String parameters = str_origin + "&amp;" + str_dest + "&amp;" + key;
+        String parameters = str_origin + "&" + str_dest + "&" + key;
         // Output format
         String output = "json";
         // Building the url to the web service
@@ -459,6 +471,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 sb.append(line);
             }
             data = sb.toString();
+            Log.d("downloadUrl", data);
             br.close();
         } catch (Exception e) {
             Log.d("Exception on download", e.toString());
@@ -519,11 +532,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             try {
                 jObject = new JSONObject(jsonData[0]);
+                Log.d("ParserTask", jsonData[0]);
                 DirectionsJSONParser parser = new DirectionsJSONParser();
+                Log.d("ParserTask", parser.toString());
 
                 // Starts parsing data
                 routes = parser.parse(jObject);
+                Log.d("ParserTask", "Executing routes");
+                Log.d("ParserTask", routes.toString());
             } catch (Exception e) {
+                Log.d("ParserTask", e.toString());
                 e.printStackTrace();
             }
             return routes;
@@ -532,12 +550,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Executes in UI thread, after the parsing process
         @Override
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            ArrayList<LatLng> points = null;
+            ArrayList<LatLng> points;
             PolylineOptions lineOptions = null;
 
             // Traversing through all the routes
             for (int i = 0; i < result.size(); i++) {
-                points = new ArrayList<LatLng>();
+                points = new ArrayList<>();
                 lineOptions = new PolylineOptions();
 
                 // Fetching i-th route
