@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_custom_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:background="#E28DAFF3"
+    android:padding="2dp">
+
+
+    <TextView
+        android:id="@+id/info_text_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="5sp"
+        android:layout_marginTop="15sp"
+        android:layout_marginEnd="5sp"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/info_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/info_text_description"
+        android:layout_below="@+id/info_text_title"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="10sp"
+        android:layout_marginTop="5sp"
+        android:layout_marginEnd="10sp"
+        android:layout_marginBottom="5sp"
+        android:contentDescription="@string/wsp_czesne_zdj_cie_zabytka" />
+
+    <TextView
+        android:id="@+id/info_text_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ok"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="5sp"
+        android:layout_marginEnd="5sp"
+        android:layout_marginBottom="10sp"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10sp"
+        android:background="#DDE2F5"
+        android:text="@string/ok"
+        android:textColor="#000000" />
+
+</RelativeLayout>

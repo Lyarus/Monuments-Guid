@@ -1,6 +1,9 @@
 package com.example.monumentsguid;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -8,9 +11,15 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,7 +34,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -52,22 +60,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
+
+    private Context mContext;
+
     // rozmiar ekranu urzadzenia
     int screenHeight;
     int screenWidth;
 
-    Button btnInfo;
-    Button btnWybierz;
-    Button btnMenu;
+    // elementy
+    private FrameLayout layoutMapa;
+    private Button btnInfo;
+    private Button btnWybierz;
+    private Button btnMenu;
+    private PopupWindow mPopupWindow;
 
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
-    private MarkerOptions mMarkerOptions;
     private Polyline mPolyline;
     private LatLng mOrigin;
-    //private Location mOrigin;
     private LatLng mDestination;
-    //private Location mDestination;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -96,12 +107,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Get the application context
+        mContext = getApplicationContext();
+
         // Pobiera rozmiar ekranu urzadzenia
         screenHeight = getResources().getDisplayMetrics().heightPixels;
         screenWidth = getResources().getDisplayMetrics().widthPixels;
 
         // Definiuje wszystkie obiekty
         setContentView(R.layout.activity_maps);
+
+        layoutMapa = findViewById(R.id.mapa);
+
         btnInfo = findViewById(R.id.btn_info);
         btnWybierz = findViewById(R.id.btn_wybierz);
         btnMenu = findViewById(R.id.btn_menu);
@@ -151,12 +168,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
 
+        // Ustawienia lokalizacji urzadzenia
+        getLocationPermission();
+        updateLocationUI();
+        mOrigin = getMyLocation();
+        if (mOrigin != null) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
+        }
+
         // Reaguje na klikniecie na mape
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
-                btnInfo.setVisibility(View.INVISIBLE);
-                btnWybierz.setVisibility(View.INVISIBLE);
+                if (mDestination == null) {
+                    btnInfo.setVisibility(View.INVISIBLE);
+                    btnWybierz.setVisibility(View.INVISIBLE);
+                } else {
+                    btnWybierz.setText(R.string.pokaz);
+                    btnWybierz.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (mOrigin != null) {
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mDestination, DEFAULT_ZOOM));
+                            }
+                        }
+                    });
+                }
+
+
             }
         });
 
@@ -171,13 +210,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        // Ustawienia lokalizacji urzadzenia
-        getLocationPermission();
-        updateLocationUI();
-        mOrigin = getMyLocation();
-        if (mOrigin != null) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
-        }
 
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
         mClusterManager = new ClusterManager<>(this, mMap);
@@ -205,7 +237,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                 final String title = document.getString("name");
-                                String comment = document.getString("comment");
+                                final String comment = document.getString("comment");
+                                final String image = document.getString("image_ref");
                                 final String description = document.getString("description");
                                 final double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
                                 final double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
@@ -218,13 +251,66 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 // Ustawienia przyciskow
                                                 // Wstawia wartosc prycisku Info - pokazuje pzycisk
                                                 btnInfo.setText(R.string.info);
-                                                ViewGroup.LayoutParams paramsInfo = btnInfo.getLayoutParams();
+                                                final ViewGroup.LayoutParams paramsInfo = btnInfo.getLayoutParams();
                                                 paramsInfo.width = screenWidth / 4;
                                                 btnInfo.setLayoutParams(paramsInfo);
+                                                // Set a click listener for the text view
                                                 btnInfo.setOnClickListener(new View.OnClickListener() {
                                                     @Override
-                                                    public void onClick(View v) {
-                                                        Toast.makeText(MapsActivity.this, "Opis: " + description, Toast.LENGTH_LONG).show();
+                                                    public void onClick(View view) {
+                                                        // Initialize a new instance of LayoutInflater service
+                                                        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
+                                                        // Inflate the custom layout/view
+                                                        View customView = null;
+                                                        if (inflater != null) {
+                                                            customView = inflater.inflate(R.layout.popup_info, null);
+                                                        }
+
+                                                        // Initialize a new instance of popup window
+                                                        int popupWidth = screenWidth * 9 / 10;
+                                                        int popupHeight = screenHeight * 2 / 3;
+                                                        mPopupWindow = new PopupWindow(customView, popupWidth, popupHeight);
+
+                                                        // Set an elevation value for popup window
+                                                        mPopupWindow.setElevation(5.0f);
+                                                        // Get a reference for the custom view button
+                                                        Button btnOk = null;
+                                                        TextView infoTitle = null;
+                                                        ImageView infoImage = null;
+                                                        TextView infoDescription = null;
+                                                        if (customView != null) {
+                                                            infoTitle = customView.findViewById(R.id.info_text_title);
+                                                            infoImage = customView.findViewById(R.id.info_image);
+                                                            infoDescription = customView.findViewById(R.id.info_text_description);
+                                                            btnOk = customView.findViewById(R.id.ok);
+                                                        }
+                                                        if (btnOk != null && infoTitle != null && infoImage != null && infoDescription != null) {
+
+                                                            infoTitle.setText(title);
+
+                                                            infoImage.setMaxHeight(screenHeight / 3);
+                                                            infoImage.setImageResource(R.drawable.default_monument);
+                                                            if (image != null) {
+                                                                // show The Image in a ImageView
+                                                                new DownloadImageTask(infoImage).execute(image);
+                                                            }
+
+                                                            infoDescription.setText(description);
+
+                                                            ViewGroup.LayoutParams paramsOk = btnOk.getLayoutParams();
+                                                            paramsOk.width = screenWidth / 4;
+                                                            btnOk.setLayoutParams(paramsOk);
+                                                            btnOk.setOnClickListener(new View.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(View view) {
+                                                                    // Dismiss the popup window
+                                                                    mPopupWindow.dismiss();
+                                                                }
+                                                            });
+                                                        }
+
+                                                        // Finally, show the popup window at the center location of root relative layout
+                                                        mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
                                                     }
                                                 });
                                                 btnInfo.setVisibility(View.VISIBLE);
@@ -587,6 +673,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             } else
                 Toast.makeText(getApplicationContext(), "Nie znaleziono trasy.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", Objects.requireNonNull(e.getMessage()));
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
         }
     }
 }
