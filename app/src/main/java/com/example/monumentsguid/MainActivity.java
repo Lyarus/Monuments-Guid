@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
     private int screenHeight;
     private int screenWidth;
     private int btnHeight;
+    private int btnWidth;
     private int imageHeight;
 
     private Button odkryte_zabytki;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         imageHeight = screenHeight / 3;
         btnHeight = (screenHeight - imageHeight) / 5;
+        btnWidth = screenWidth * 2 / 3;
 
         main_icon = findViewById(R.id.main_icon_layout);
         ViewGroup.LayoutParams paramsMainIcon = main_icon.getLayoutParams();
@@ -41,11 +43,13 @@ public class MainActivity extends AppCompatActivity {
         odkryte_zabytki = findViewById(R.id.btn_odkryte_zabytki);
         ViewGroup.LayoutParams paramsOdkryteZabytki = odkryte_zabytki.getLayoutParams();
         paramsOdkryteZabytki.height = btnHeight;
+        paramsOdkryteZabytki.width = btnWidth;
         odkryte_zabytki.setLayoutParams(paramsOdkryteZabytki);
 
         mapa = findViewById(R.id.btn_mapa);
         ViewGroup.LayoutParams paramsMapa = mapa.getLayoutParams();
         paramsMapa.height = btnHeight;
+        paramsMapa.width = btnWidth;
         mapa.setLayoutParams(paramsMapa);
         mapa.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
         informacja = findViewById(R.id.btn_informacja);
         ViewGroup.LayoutParams paramsInformacja = informacja.getLayoutParams();
         paramsInformacja.height = btnHeight;
+        paramsInformacja.width = btnWidth;
         informacja.setLayoutParams(paramsInformacja);
-
     }
 
 }

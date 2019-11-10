@@ -239,7 +239,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         updateLocationUI();
         mOrigin = getMyLocation();
         if (mOrigin != null) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
         }
 
         // Reaguje na klikniecie na mape
