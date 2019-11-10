@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
-    android:background="#E28DAFF3"
+    android:background="@drawable/rounded_corner_popup"
     android:padding="2dp">
 
     <RelativeLayout
@@ -22,7 +22,7 @@
             android:background="@drawable/round_button_background"
             android:gravity="center_vertical|center_horizontal"
             android:text="@string/x"
-            android:textColor="#FCFAFA"
+            android:textColor="#DDD3D3F5"
             android:textSize="12sp"
             android:textStyle="bold" />
 

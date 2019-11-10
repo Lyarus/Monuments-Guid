@@ -72,16 +72,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // elementy
     private FrameLayout layoutMapa;
-    private Button btnInfo;
-    private Button btnWybierz;
+    private Button btnLeft;
+    private Button btnRight;
     private Button btnMenu;
     // Połaczenie z BD
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private int btnMenuWidth;
-    private int btnInfoWidth;
+    private int btnBottomWidth;
     private int imageLayoutHeight;
     private PopupWindow mPopupWindow;
-    private int btnWybierzWidth;
     private String title;
     private String comment;
     private String image;
@@ -134,13 +133,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Definiuje obiekty w zaleznosci od parametrow ekranu urzadzenia
         if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
             btnMenuWidth = screenHeight / 3;
-            btnInfoWidth = btnWybierzWidth = screenHeight / 4;
+            btnBottomWidth = screenHeight / 4;
             popupHeight = screenWidth * 9 / 10;
-            popupWidth = screenHeight - 3 * btnInfoWidth;
+            popupWidth = screenHeight - 3 * btnBottomWidth;
             imageLayoutHeight = screenWidth / 2;
         } else if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
             btnMenuWidth = screenWidth / 3;
-            btnInfoWidth = btnWybierzWidth = screenWidth / 4;
+            btnBottomWidth = screenWidth / 4;
             popupHeight = screenHeight * 2 / 3;
             popupWidth = screenWidth * 9 / 10;
             imageLayoutHeight = screenHeight / 3;
@@ -151,8 +150,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         layoutMapa = findViewById(R.id.mapa);
 
-        btnInfo = findViewById(R.id.btn_info);
-        btnWybierz = findViewById(R.id.btn_wybierz);
+        btnLeft = findViewById(R.id.btn_info);
+        btnRight = findViewById(R.id.btn_trasa);
         btnMenu = findViewById(R.id.btn_menu);
 
         inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -196,7 +195,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Ustawienia dla poziomej orientacji
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             popupHeight = screenWidth * 9 / 10;
-            popupWidth = screenHeight - 3 * btnInfoWidth;
+            popupWidth = screenHeight - 3 * btnBottomWidth;
             imageLayoutHeight = screenWidth / 2;
         }
         // Ustawienia dla piionowej orientacji
@@ -247,11 +246,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng point) {
                 if (mDestination == null) {
-                    btnInfo.setVisibility(View.INVISIBLE);
-                    btnWybierz.setVisibility(View.INVISIBLE);
+                    btnLeft.setVisibility(View.INVISIBLE);
+                    btnRight.setVisibility(View.INVISIBLE);
+
                 } else {
-                    btnWybierz.setText(R.string.pokaz);
-                    btnWybierz.setOnClickListener(new View.OnClickListener() {
+                    //btnRight.setVisibility(View.INVISIBLE);
+                    btnRight.setText(R.string.pokaz);
+                    ViewGroup.LayoutParams paramsTrasa = btnRight.getLayoutParams();
+                    paramsTrasa.width = btnBottomWidth;
+                    btnRight.setLayoutParams(paramsTrasa);
+                    btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
+                    btnRight.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             if (mOrigin != null) {
@@ -259,15 +264,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }
                         }
                     });
+                    btnRight.setVisibility(View.VISIBLE);
                 }
-
-
             }
         });
 
         // Definiuje przycisk Menu
         ViewGroup.LayoutParams paramsMenu = btnMenu.getLayoutParams();
-
         paramsMenu.width = btnMenuWidth;
         btnMenu.setLayoutParams(paramsMenu);
         btnMenu.setOnClickListener(new View.OnClickListener() {
@@ -317,12 +320,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             public void onClusterItemInfoWindowClick(ClusterItem ClusterItem) {
                                                 // Ustawienia przyciskow
                                                 // Wstawia wartosc prycisku Info - pokazuje pzycisk
-                                                btnInfo.setText(R.string.info);
-                                                final ViewGroup.LayoutParams paramsInfo = btnInfo.getLayoutParams();
-                                                paramsInfo.width = btnInfoWidth;
-                                                btnInfo.setLayoutParams(paramsInfo);
+                                                btnLeft.setText(R.string.info);
+                                                final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
+                                                paramsInfo.width = btnBottomWidth;
+                                                btnLeft.setLayoutParams(paramsInfo);
                                                 // Set a click listener for the text view
-                                                btnInfo.setOnClickListener(new View.OnClickListener() {
+                                                btnLeft.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View view) {
 
@@ -335,26 +338,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                         setPopupWindowContent(customView, popupWidth, popupHeight, title, image, description);
                                                     }
                                                 });
-                                                btnInfo.setVisibility(View.VISIBLE);
+                                                btnLeft.setVisibility(View.VISIBLE);
 
                                                 // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
-                                                btnWybierz.setText(R.string.wybierz);
-                                                ViewGroup.LayoutParams paramsWybierz = btnWybierz.getLayoutParams();
-                                                paramsWybierz.width = btnWybierzWidth;
-                                                btnWybierz.setLayoutParams(paramsWybierz);
-                                                btnWybierz.setOnClickListener(new View.OnClickListener() {
+                                                btnRight.setText(R.string.wybierz);
+                                                final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
+                                                paramsWybierz.width = btnBottomWidth;
+                                                btnRight.setLayoutParams(paramsWybierz);
+                                                if (mDestination == null) {
+                                                    btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
+                                                } else {
+                                                    btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button_grey));
+                                                }
+                                                btnRight.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View v) {
-                                                        getMyLocation();
-                                                        mDestination = new LatLng(lat, lng);
-                                                        if (mOrigin != null) {
-                                                            Toast.makeText(MapsActivity.this, "Wybrano: " + mOrigin.latitude + ":" + mOrigin.longitude + " / " + mDestination.latitude + ";" + mDestination.longitude, Toast.LENGTH_LONG).show();
-                                                            drawRoute();
+
+                                                        // Klikniecie jezeli zabytek nie jest wybrany - rysuje trase
+                                                        if (mDestination == null) {
+                                                            getMyLocation();
+                                                            mDestination = new LatLng(lat, lng);
+                                                            if (mOrigin != null) {
+                                                                drawRoute();
+                                                            }
+                                                            btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button_grey));
+                                                        }
+                                                        // Klikniecie jezeli zabytek juz jest wybrany - usuwa trase i przyciski
+                                                        else {
+                                                            if (mPolyline != null) {
+                                                                mPolyline.remove();
+                                                                mDestination = null;
+                                                                btnLeft.setVisibility(View.INVISIBLE);
+                                                                btnRight.setVisibility(View.INVISIBLE);
+                                                                btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
+                                                            }
                                                         }
                                                     }
                                                 });
-                                                btnWybierz.setVisibility(View.VISIBLE);
-
+                                                btnRight.setVisibility(View.VISIBLE);
                                             }
                                         });
                             }
@@ -699,16 +720,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // Dismiss the popup window
                     mPopupWindow.dismiss();
                     showPopupInfo = false;
-                    btnInfo.setEnabled(true);
-                    btnWybierz.setEnabled(true);
+                    btnLeft.setEnabled(true);
+                    btnRight.setEnabled(true);
                     btnMenu.setEnabled(true);
                 }
             });
         }
         // Pokazuje popup po środku, przyciski ustawia na nieaktywne
         mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
-        btnInfo.setEnabled(false);
-        btnWybierz.setEnabled(false);
+        btnLeft.setEnabled(false);
+        btnRight.setEnabled(false);
         btnMenu.setEnabled(false);
     }
 
