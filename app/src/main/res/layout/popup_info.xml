@@ -7,56 +7,89 @@
     android:background="#E28DAFF3"
     android:padding="2dp">
 
-
-    <TextView
-        android:id="@+id/info_text_title"
+    <RelativeLayout
+        android:id="@+id/info_top"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="5sp"
-        android:layout_marginTop="15sp"
-        android:layout_marginEnd="5sp"
-        android:textAlignment="center"
-        android:textColor="#000000"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/info_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/info_text_description"
-        android:layout_below="@+id/info_text_title"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="10sp"
-        android:layout_marginTop="5sp"
-        android:layout_marginEnd="10sp"
-        android:layout_marginBottom="5sp"
-        android:contentDescription="@string/wsp_czesne_zdj_cie_zabytka" />
+        <Button
+            android:id="@+id/close"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="5dp"
+            android:background="@drawable/round_button_background"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/x"
+            android:textColor="#FCFAFA"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/info_text_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/ok"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="5sp"
-        android:layout_marginEnd="5sp"
-        android:layout_marginBottom="10sp"
-        android:textAlignment="center"
-        android:textColor="#000000"
-        android:textSize="18sp" />
 
-    <Button
-        android:id="@+id/ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10sp"
-        android:background="#DDE2F5"
-        android:text="@string/ok"
-        android:textColor="#000000" />
+        <TextView
+            android:id="@+id/info_text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="5sp"
+            android:layout_marginTop="15sp"
+            android:layout_marginEnd="5sp"
+            android:text="@string/brak_nag_wka"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/SCROLLER_ID"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/info_top"
+        android:fillViewport="true"
+        android:scrollbars="vertical">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <LinearLayout
+                android:id="@+id/info_image_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true">
+
+                <ImageView
+                    android:id="@+id/info_image"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_marginStart="10sp"
+                    android:layout_marginTop="5sp"
+                    android:layout_marginEnd="10sp"
+                    android:layout_marginBottom="5sp"
+                    android:contentDescription="@string/wsp_czesne_zdj_cie_zabytka"
+                    android:src="@drawable/default_monument" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/info_text_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/info_image_layout"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="5sp"
+                android:layout_marginEnd="5sp"
+                android:layout_marginBottom="10sp"
+                android:text="@string/brak_opisu"
+                android:textAlignment="center"
+                android:textColor="#000000"
+                android:textSize="18sp" />
+
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

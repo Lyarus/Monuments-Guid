@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -274,22 +275,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                         // Set an elevation value for popup window
                                                         mPopupWindow.setElevation(5.0f);
                                                         // Get a reference for the custom view button
-                                                        Button btnOk = null;
+                                                        Button btnClose = null;
                                                         TextView infoTitle = null;
                                                         ImageView infoImage = null;
                                                         TextView infoDescription = null;
+                                                        LinearLayout imageLayout = null;
                                                         if (customView != null) {
                                                             infoTitle = customView.findViewById(R.id.info_text_title);
                                                             infoImage = customView.findViewById(R.id.info_image);
                                                             infoDescription = customView.findViewById(R.id.info_text_description);
-                                                            btnOk = customView.findViewById(R.id.ok);
+                                                            btnClose = customView.findViewById(R.id.close);
+                                                            imageLayout = customView.findViewById(R.id.info_image_layout);
                                                         }
-                                                        if (btnOk != null && infoTitle != null && infoImage != null && infoDescription != null) {
+                                                        if (btnClose != null && infoTitle != null && infoImage != null && infoDescription != null) {
 
                                                             infoTitle.setText(title);
 
-                                                            infoImage.setMaxHeight(screenHeight / 3);
-                                                            infoImage.setImageResource(R.drawable.default_monument);
+                                                            ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
+                                                            params.height = screenHeight / 3;
+                                                            imageLayout.setLayoutParams(params);
+
+                                                            infoImage.setMaxWidth(screenWidth / 3);
+                                                            infoImage.setMinimumWidth(screenWidth / 5);
                                                             if (image != null) {
                                                                 // show The Image in a ImageView
                                                                 new DownloadImageTask(infoImage).execute(image);
@@ -297,20 +304,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                                             infoDescription.setText(description);
 
-                                                            ViewGroup.LayoutParams paramsOk = btnOk.getLayoutParams();
-                                                            paramsOk.width = screenWidth / 4;
-                                                            btnOk.setLayoutParams(paramsOk);
-                                                            btnOk.setOnClickListener(new View.OnClickListener() {
+                                                            btnClose.setOnClickListener(new View.OnClickListener() {
                                                                 @Override
                                                                 public void onClick(View view) {
                                                                     // Dismiss the popup window
                                                                     mPopupWindow.dismiss();
+                                                                    btnInfo.setEnabled(true);
+                                                                    btnWybierz.setEnabled(true);
+                                                                    btnMenu.setEnabled(true);
                                                                 }
                                                             });
                                                         }
 
                                                         // Finally, show the popup window at the center location of root relative layout
                                                         mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
+                                                        btnInfo.setEnabled(false);
+                                                        btnWybierz.setEnabled(false);
+                                                        btnMenu.setEnabled(false);
                                                     }
                                                 });
                                                 btnInfo.setVisibility(View.VISIBLE);
