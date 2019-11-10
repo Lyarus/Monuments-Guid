@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Monuments Guid</string>
+    <string name="app_name">PhotoGuid</string>
     <string name="title_activity_maps">Map</string>
     <string name="info">Info</string>
     <string name="wybierz">Wybierz</string>
@@ -11,4 +11,8 @@
     <string name="x">X</string>
     <string name="brak_opisu">Brak opisu</string>
     <string name="brak_nag_wka">Brak nagłówka</string>
+    <string name="ikonka_aplikacji">Ikonka aplikacji</string>
+    <string name="odkryte_zabytki">Odkryte zabytki</string>
+    <string name="mapa">Mapa</string>
+    <string name="informacja">Informacja</string>
 </resources>

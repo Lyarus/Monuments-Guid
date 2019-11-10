@@ -1,6 +1,7 @@
 package com.example.monumentsguid;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -275,8 +276,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnMenu.setLayoutParams(paramsMenu);
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Toast.makeText(MapsActivity.this, "Menu", Toast.LENGTH_LONG).show();
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), MainActivity.class);
+                view.getContext().startActivity(intent);
             }
         });
 
