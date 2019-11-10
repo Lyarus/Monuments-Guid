@@ -2,6 +2,7 @@ package com.example.monumentsguid;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -67,19 +68,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // rozmiar ekranu urzadzenia
     int screenHeight;
     int screenWidth;
+    int screenOrientation;
 
     // elementy
     private FrameLayout layoutMapa;
     private Button btnInfo;
     private Button btnWybierz;
     private Button btnMenu;
+    // Połaczenie z BD
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private int btnMenuWidth;
+    private int btnInfoWidth;
+    private int imageLayoutHeight;
     private PopupWindow mPopupWindow;
+    private int btnWybierzWidth;
+    private String title;
+    private String comment;
+    private String image;
+    private String description;
+    private double lat;
 
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private Polyline mPolyline;
     private LatLng mOrigin;
     private LatLng mDestination;
+    private double lng;
+    private View customView;
+    private LayoutInflater inflater;
+    private int popupWidth;
+    private int popupHeight;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -96,13 +114,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Keys for storing activity state.
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
-
-    // Połaczenie się z BD
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private boolean showPopupInfo;
 
     // Clustery
     private ClusterManager<ClusterItem> mClusterManager;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,9 +126,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Get the application context
         mContext = getApplicationContext();
 
-        // Pobiera rozmiar ekranu urzadzenia
+        // Pobiera parametry ekranu urzadzenia
         screenHeight = getResources().getDisplayMetrics().heightPixels;
         screenWidth = getResources().getDisplayMetrics().widthPixels;
+        screenOrientation = getResources().getConfiguration().orientation;
+
+        // Definiuje obiekty w zaleznosci od parametrow ekranu urzadzenia
+        if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            btnMenuWidth = screenHeight / 3;
+            btnInfoWidth = btnWybierzWidth = screenHeight / 4;
+            popupHeight = screenWidth * 9 / 10;
+            popupWidth = screenHeight - 3 * btnInfoWidth;
+            imageLayoutHeight = screenWidth / 2;
+        } else if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            btnMenuWidth = screenWidth / 3;
+            btnInfoWidth = btnWybierzWidth = screenWidth / 4;
+            popupHeight = screenHeight * 2 / 3;
+            popupWidth = screenWidth * 9 / 10;
+            imageLayoutHeight = screenHeight / 3;
+        }
 
         // Definiuje wszystkie obiekty
         setContentView(R.layout.activity_maps);
@@ -124,11 +155,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnWybierz = findViewById(R.id.btn_wybierz);
         btnMenu = findViewById(R.id.btn_menu);
 
+        inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
+        customView = null;
+        showPopupInfo = false;
+
         // Retrieve location from saved instance state.
         if (savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
         }
-
 
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -150,6 +184,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
             outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
             super.onSaveInstanceState(outState);
+        }
+    }
+
+    /**
+     * Reaguje na zmiany rotacji ekranu
+     */
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Ustawienia dla poziomej orientacji
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            popupHeight = screenWidth * 9 / 10;
+            popupWidth = screenHeight - 3 * btnInfoWidth;
+            imageLayoutHeight = screenWidth / 2;
+        }
+        // Ustawienia dla piionowej orientacji
+        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            popupHeight = screenHeight * 2 / 3;
+            popupWidth = screenWidth * 9 / 10;
+            imageLayoutHeight = screenHeight / 3;
+        }
+        // Jezeli przy obróceniu ekrana popup był widoczny
+        if (showPopupInfo) {
+            // Zeruje poprzedni popup
+            customView = null;
+            mPopupWindow.dismiss();
+            //Tworzy nowy
+            if (inflater != null) {
+                customView = inflater.inflate(R.layout.popup_info, null);
+            }
+            setPopupWindowContent(customView, popupWidth, popupHeight, title, image, description);
         }
     }
 
@@ -202,7 +267,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Definiuje przycisk Menu
         ViewGroup.LayoutParams paramsMenu = btnMenu.getLayoutParams();
-        paramsMenu.width = screenWidth / 3;
+
+        paramsMenu.width = btnMenuWidth;
         btnMenu.setLayoutParams(paramsMenu);
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -237,12 +303,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                final String title = document.getString("name");
-                                final String comment = document.getString("comment");
-                                final String image = document.getString("image_ref");
-                                final String description = document.getString("description");
-                                final double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
-                                final double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
+                                title = document.getString("name");
+                                comment = document.getString("comment");
+                                image = document.getString("image_ref");
+                                description = document.getString("description");
+                                lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
+                                lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
                                 mClusterManager.addItem(new ClusterItem(lat, lng, title, comment, description));
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                 mClusterManager.setOnClusterItemInfoWindowClickListener(
@@ -253,74 +319,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 // Wstawia wartosc prycisku Info - pokazuje pzycisk
                                                 btnInfo.setText(R.string.info);
                                                 final ViewGroup.LayoutParams paramsInfo = btnInfo.getLayoutParams();
-                                                paramsInfo.width = screenWidth / 4;
+                                                paramsInfo.width = btnInfoWidth;
                                                 btnInfo.setLayoutParams(paramsInfo);
                                                 // Set a click listener for the text view
                                                 btnInfo.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View view) {
-                                                        // Initialize a new instance of LayoutInflater service
-                                                        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-                                                        // Inflate the custom layout/view
-                                                        View customView = null;
+
+                                                        showPopupInfo = true;
+                                                        customView = null;
+
                                                         if (inflater != null) {
                                                             customView = inflater.inflate(R.layout.popup_info, null);
                                                         }
-
-                                                        // Initialize a new instance of popup window
-                                                        int popupWidth = screenWidth * 9 / 10;
-                                                        int popupHeight = screenHeight * 2 / 3;
-                                                        mPopupWindow = new PopupWindow(customView, popupWidth, popupHeight);
-
-                                                        // Set an elevation value for popup window
-                                                        mPopupWindow.setElevation(5.0f);
-                                                        // Get a reference for the custom view button
-                                                        Button btnClose = null;
-                                                        TextView infoTitle = null;
-                                                        ImageView infoImage = null;
-                                                        TextView infoDescription = null;
-                                                        LinearLayout imageLayout = null;
-                                                        if (customView != null) {
-                                                            infoTitle = customView.findViewById(R.id.info_text_title);
-                                                            infoImage = customView.findViewById(R.id.info_image);
-                                                            infoDescription = customView.findViewById(R.id.info_text_description);
-                                                            btnClose = customView.findViewById(R.id.close);
-                                                            imageLayout = customView.findViewById(R.id.info_image_layout);
-                                                        }
-                                                        if (btnClose != null && infoTitle != null && infoImage != null && infoDescription != null) {
-
-                                                            infoTitle.setText(title);
-
-                                                            ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
-                                                            params.height = screenHeight / 3;
-                                                            imageLayout.setLayoutParams(params);
-
-                                                            infoImage.setMaxWidth(screenWidth / 3);
-                                                            infoImage.setMinimumWidth(screenWidth / 5);
-                                                            if (image != null) {
-                                                                // show The Image in a ImageView
-                                                                new DownloadImageTask(infoImage).execute(image);
-                                                            }
-
-                                                            infoDescription.setText(description);
-
-                                                            btnClose.setOnClickListener(new View.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(View view) {
-                                                                    // Dismiss the popup window
-                                                                    mPopupWindow.dismiss();
-                                                                    btnInfo.setEnabled(true);
-                                                                    btnWybierz.setEnabled(true);
-                                                                    btnMenu.setEnabled(true);
-                                                                }
-                                                            });
-                                                        }
-
-                                                        // Finally, show the popup window at the center location of root relative layout
-                                                        mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
-                                                        btnInfo.setEnabled(false);
-                                                        btnWybierz.setEnabled(false);
-                                                        btnMenu.setEnabled(false);
+                                                        setPopupWindowContent(customView, popupWidth, popupHeight, title, image, description);
                                                     }
                                                 });
                                                 btnInfo.setVisibility(View.VISIBLE);
@@ -328,7 +340,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
                                                 btnWybierz.setText(R.string.wybierz);
                                                 ViewGroup.LayoutParams paramsWybierz = btnWybierz.getLayoutParams();
-                                                paramsWybierz.width = screenWidth / 4;
+                                                paramsWybierz.width = btnWybierzWidth;
                                                 btnWybierz.setLayoutParams(paramsWybierz);
                                                 btnWybierz.setOnClickListener(new View.OnClickListener() {
                                                     @Override
@@ -449,44 +461,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e("Exception: %s", Objects.requireNonNull(e.getMessage()));
         }
         return mOrigin;
-    }
-
-    /**
-     * Gets the current location of the device, and positions the map's camera.
-     */
-    private void getDeviceLocation() {
-
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
-        try {
-            if (mLocationPermissionGranted) {
-                Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            mLastKnownLocation = task.getResult();
-                            if (mLastKnownLocation != null) {
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(mLastKnownLocation.getLatitude(),
-                                                mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                            }
-                        } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.animateCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-            Log.e("Exception: %s", Objects.requireNonNull(e.getMessage()));
-        }
     }
 
     /**
@@ -686,10 +660,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Tworzy popup z informacja o zabytku
+     */
+    private void setPopupWindowContent(View view, int width, int height, String title, String image, String description) {
+        // Tworzy popup
+        mPopupWindow = new PopupWindow(view, width, height);
+        mPopupWindow.setElevation(5.0f);
+        // Ustawia elementy popupa
+        Button btnClose = null;
+        TextView infoTitle = null;
+        ImageView infoImage = null;
+        TextView infoDescription = null;
+        LinearLayout imageLayout = null;
+        if (customView != null) {
+            infoTitle = customView.findViewById(R.id.info_text_title);
+            infoImage = customView.findViewById(R.id.info_image);
+            infoDescription = customView.findViewById(R.id.info_text_description);
+            btnClose = customView.findViewById(R.id.close);
+            imageLayout = customView.findViewById(R.id.info_image_layout);
+        }
+        if (btnClose != null && infoTitle != null && infoImage != null && infoDescription != null) {
+            // Wstawia nagłówek
+            infoTitle.setText(title);
+            // Wstawia obrazek
+            ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
+            params.height = imageLayoutHeight;
+            imageLayout.setLayoutParams(params);
+            if (image != null) {
+                new DownloadImageTask(infoImage).execute(image);
+            }
+            // Wstawia opis
+            infoDescription.setText(description);
+            // Ustwienia przycisku na wyłączenie
+            btnClose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Dismiss the popup window
+                    mPopupWindow.dismiss();
+                    showPopupInfo = false;
+                    btnInfo.setEnabled(true);
+                    btnWybierz.setEnabled(true);
+                    btnMenu.setEnabled(true);
+                }
+            });
+        }
+        // Pokazuje popup po środku, przyciski ustawia na nieaktywne
+        mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
+        btnInfo.setEnabled(false);
+        btnWybierz.setEnabled(false);
+        btnMenu.setEnabled(false);
+    }
+
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
-        public DownloadImageTask(ImageView bmImage) {
+        DownloadImageTask(ImageView bmImage) {
             this.bmImage = bmImage;
         }
 
