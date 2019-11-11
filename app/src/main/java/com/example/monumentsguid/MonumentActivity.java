@@ -36,6 +36,8 @@ public class MonumentActivity extends AppCompatActivity {
     private String name;
     private String id;
     private String city_ref;
+    private double lat;
+    private double lng;
 
     private GridView gridView;
     private ItemGridAdapter monumentAdapter;
@@ -44,8 +46,10 @@ public class MonumentActivity extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent i = new Intent(getApplicationContext(),
-                    CityActivity.class);
+                    MapsShowActivity.class);
             i.putExtra("id", monumentIds.get(position));
+            i.putExtra("lat", lat);
+            i.putExtra("lng", lng);
             startActivity(i);
         }
     };
@@ -86,6 +90,8 @@ public class MonumentActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                 name = document.getString("name");
                                 id = document.getId();
+                                lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
+                                lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                 monumentNames.add(name);
                                 monumentImages.add("");
@@ -93,7 +99,7 @@ public class MonumentActivity extends AppCompatActivity {
                             }
                             monumentAdapter = new ItemGridAdapter(MonumentActivity.this, monumentIds, monumentNames, monumentImages);
                             gridView.setAdapter(monumentAdapter);
-                            //gridView.setOnItemClickListener(gridViewOnItemClickListener);
+                            gridView.setOnItemClickListener(gridViewOnItemClickListener);
                         }
                     }
                 });

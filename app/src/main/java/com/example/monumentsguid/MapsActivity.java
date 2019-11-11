@@ -63,8 +63,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
-
     private Context mContext;
+
+    // A default location and default zoom to use when location permission is not granted.
+    private final LatLng mDefaultLocation = new LatLng(51, 17);
 
     // rozmiar ekranu urzadzenia
     int screenHeight;
@@ -76,8 +78,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnLeft;
     private Button btnRight;
     private Button btnMenu;
-    // Połaczenie z BD
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private int btnMenuWidth;
     private int btnBottomWidth;
     private int imageLayoutHeight;
@@ -88,11 +88,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String description;
     private double lat;
     private double lng;
-
     private Polyline mPolyline;
     private LatLng mOrigin;
     private LatLng mDestination;
-
     private View customView;
     private LayoutInflater inflater;
     private int popupWidth;
@@ -100,9 +98,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
-
-    // A default location (Sydney, Australia) and default zoom to use when location permission is not granted.
-    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
+    // Połaczenie z BD
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
@@ -121,6 +118,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
 
         // Get the application context
         mContext = getApplicationContext();
@@ -146,10 +144,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Definiuje wszystkie obiekty
-        setContentView(R.layout.activity_maps);
-
         layoutMapa = findViewById(R.id.mapa);
-
         btnLeft = findViewById(R.id.btn_info);
         btnRight = findViewById(R.id.btn_trasa);
         btnMenu = findViewById(R.id.btn_menu);
@@ -256,6 +251,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mOrigin = getMyLocation();
         if (mOrigin != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
+        } else {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
         }
 
         // Reaguje na klikniecie na mape
@@ -267,7 +264,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     btnRight.setVisibility(View.INVISIBLE);
 
                 } else {
-                    //btnRight.setVisibility(View.INVISIBLE);
                     btnRight.setText(R.string.pokaz);
                     ViewGroup.LayoutParams paramsTrasa = btnRight.getLayoutParams();
                     paramsTrasa.width = btnBottomWidth;
@@ -276,7 +272,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     btnRight.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (mOrigin != null) {
+                            if (mDestination != null) {
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mDestination, DEFAULT_ZOOM));
                             }
                         }
@@ -336,7 +332,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                                             @Override
                                             public void onClusterItemInfoWindowClick(ClusterItem ClusterItem) {
-                                                // Ustawienia przyciskow
                                                 // Wstawia wartosc prycisku Info - pokazuje pzycisk
                                                 btnLeft.setText(R.string.info);
                                                 final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
@@ -346,10 +341,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 btnLeft.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View view) {
-
                                                         showPopupInfo = true;
                                                         customView = null;
-
                                                         if (inflater != null) {
                                                             customView = inflater.inflate(R.layout.popup_info, null);
                                                         }
@@ -467,13 +460,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onProviderDisabled(String provider) {
             }
         };
-        /*
-         * Get the best and most recent location of the device, which may be null in rare cases when a location is not available.
-         */
+
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, mLocationListener);
+                if (mLocationManager != null) {
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, mLocationListener);
+                }
 
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
