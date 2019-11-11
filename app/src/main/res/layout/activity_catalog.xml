@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/tlo"
+        android:scaleType="centerCrop"
+        android:src="@drawable/map_background" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10sp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textOdkryteZabytki"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginBottom="20sp"
+            android:background="@drawable/round_button_background"
+            android:paddingStart="20sp"
+            android:paddingTop="15sp"
+            android:paddingEnd="20sp"
+            android:paddingBottom="15sp"
+            android:text="@string/odkryte_zabytki"
+            android:textAlignment="center"
+            android:textColor="@color/colorTextLight"
+            android:textSize="30sp"
+            android:textStyle="bold|italic" />
+
+        <GridView
+            android:id="@+id/gridview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10sp"
+            android:layout_marginEnd="10sp"
+            android:columnWidth="100dp"
+            android:gravity="center"
+            android:horizontalSpacing="10dp"
+            android:numColumns="auto_fit"
+            android:stretchMode="spacingWidth"
+            android:verticalSpacing="20dp" />
+
+    </LinearLayout>
+</FrameLayout>

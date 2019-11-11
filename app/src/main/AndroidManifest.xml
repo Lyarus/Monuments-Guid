@@ -15,7 +15,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".InfoActivity"></activity>
+        <activity
+            android:name=".CountryActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".CityActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".MonumentActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity android:name=".InfoActivity" />
         <activity
             android:name=".MainActivity"
             android:label="PhotoGuid"
@@ -41,7 +50,7 @@
         <activity
             android:name=".MapsActivity"
             android:configChanges="orientation|screenSize"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"></activity>
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
     </application>
 
 </manifest>

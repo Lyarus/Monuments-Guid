@@ -32,4 +32,8 @@
     <string name="opisApp4">
         No cóż… Jesteś gotowy na podróż w przeszłość?
     </string>
+    <string name="polska">Polska</string>
+    <string name="kraje">Kraje</string>
+    <string name="miasta">Miasta</string>
+    <string name="zabytki">Zabytki</string>
 </resources>

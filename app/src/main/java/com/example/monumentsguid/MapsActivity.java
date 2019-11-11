@@ -735,7 +735,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnMenu.setEnabled(false);
     }
 
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+    public static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
         DownloadImageTask(ImageView bmImage) {
