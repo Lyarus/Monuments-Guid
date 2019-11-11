@@ -34,7 +34,6 @@ public class MonumentActivity extends AppCompatActivity {
     private List<String> monumentImages;
     private List<String> monumentIds;
     private String name;
-    private String image;
     private String id;
     private String city_ref;
 
@@ -86,11 +85,10 @@ public class MonumentActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                 name = document.getString("name");
-                                image = document.getString("image");
                                 id = document.getId();
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                 monumentNames.add(name);
-                                monumentImages.add(image);
+                                monumentImages.add("");
                                 monumentIds.add(id);
                             }
                             monumentAdapter = new ItemGridAdapter(MonumentActivity.this, monumentIds, monumentNames, monumentImages);

@@ -87,13 +87,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String image;
     private String description;
     private double lat;
+    private double lng;
 
-    private LocationManager mLocationManager;
-    private LocationListener mLocationListener;
     private Polyline mPolyline;
     private LatLng mOrigin;
     private LatLng mDestination;
-    private double lng;
+
     private View customView;
     private LayoutInflater inflater;
     private int popupWidth;
@@ -135,9 +134,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
             btnMenuWidth = screenHeight / 3;
             btnBottomWidth = screenHeight / 4;
-            popupHeight = screenWidth * 9 / 10;
-            popupWidth = screenHeight - 3 * btnBottomWidth;
-            imageLayoutHeight = screenWidth / 2;
+            popupHeight = screenHeight * 9 / 10;
+            popupWidth = screenWidth - 3 * btnBottomWidth;
+            imageLayoutHeight = screenHeight / 2;
         } else if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
             btnMenuWidth = screenWidth / 3;
             btnBottomWidth = screenWidth / 4;
@@ -193,18 +192,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // Ustawienia dla poziomej orientacji
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            popupHeight = screenWidth * 9 / 10;
-            popupWidth = screenHeight - 3 * btnBottomWidth;
-            imageLayoutHeight = screenWidth / 2;
+
+        if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // Ustawienia dla poziomej orientacji
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                popupHeight = screenHeight * 9 / 10;
+                popupWidth = screenWidth - 3 * btnBottomWidth;
+                imageLayoutHeight = screenHeight / 2;
+            }
+            // Ustawienia dla pionowej orientacji
+            else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                popupHeight = screenWidth * 2 / 3;
+                popupWidth = screenHeight * 9 / 10;
+                imageLayoutHeight = screenWidth / 3;
+            }
+        } else if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Ustawienia dla poziomej orientacji
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                popupHeight = screenWidth * 9 / 10;
+                popupWidth = screenHeight - 3 * btnBottomWidth;
+                imageLayoutHeight = screenWidth / 2;
+            }
+            // Ustawienia dla pionowej orientacji
+            else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                popupHeight = screenHeight * 2 / 3;
+                popupWidth = screenWidth * 9 / 10;
+                imageLayoutHeight = screenHeight / 3;
+            }
         }
-        // Ustawienia dla piionowej orientacji
-        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            popupHeight = screenHeight * 2 / 3;
-            popupWidth = screenWidth * 9 / 10;
-            imageLayoutHeight = screenHeight / 3;
-        }
+
         // Jezeli przy obróceniu ekrana popup był widoczny
         if (showPopupInfo) {
             // Zeruje poprzedni popup
@@ -427,9 +443,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private LatLng getMyLocation() {
         // Getting LocationManager object from System Service LOCATION_SERVICE
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        mLocationListener = new LocationListener() {
+        LocationListener mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 mOrigin = new LatLng(location.getLatitude(), location.getLongitude());
