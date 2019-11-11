@@ -62,11 +62,11 @@ import java.util.Objects;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
+    private static final int DEFAULT_ZOOM = 13;
+    private final LatLng mDefaultLocation = new LatLng(51.098781, 17.036716);
+
     private GoogleMap mMap;
     private Context mContext;
-
-    // A default location and default zoom to use when location permission is not granted.
-    private final LatLng mDefaultLocation = new LatLng(51, 17);
 
     // rozmiar ekranu urzadzenia
     int screenHeight;
@@ -100,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient mFusedLocationProviderClient;
     // Połaczenie z BD
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private static final int DEFAULT_ZOOM = 15;
+
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
 

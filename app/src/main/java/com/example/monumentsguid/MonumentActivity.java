@@ -33,6 +33,8 @@ public class MonumentActivity extends AppCompatActivity {
     private List<String> monumentNames;
     private List<String> monumentImages;
     private List<String> monumentIds;
+    private List<Double> monumentLat;
+    private List<Double> monumentLng;
     private String name;
     private String id;
     private String city_ref;
@@ -48,8 +50,8 @@ public class MonumentActivity extends AppCompatActivity {
             Intent i = new Intent(getApplicationContext(),
                     MapsShowActivity.class);
             i.putExtra("id", monumentIds.get(position));
-            i.putExtra("lat", lat);
-            i.putExtra("lng", lng);
+            i.putExtra("lat", monumentLat.get(position));
+            i.putExtra("lng", monumentLng.get(position));
             startActivity(i);
         }
     };
@@ -75,6 +77,8 @@ public class MonumentActivity extends AppCompatActivity {
         monumentNames = new ArrayList<>();
         monumentImages = new ArrayList<>();
         monumentIds = new ArrayList<>();
+        monumentLat = new ArrayList<>();
+        monumentLng = new ArrayList<>();
         addGridItems();
     }
 
@@ -96,6 +100,8 @@ public class MonumentActivity extends AppCompatActivity {
                                 monumentNames.add(name);
                                 monumentImages.add("");
                                 monumentIds.add(id);
+                                monumentLat.add(lat);
+                                monumentLng.add(lng);
                             }
                             monumentAdapter = new ItemGridAdapter(MonumentActivity.this, monumentIds, monumentNames, monumentImages);
                             gridView.setAdapter(monumentAdapter);
