@@ -64,6 +64,13 @@ public class MainActivity extends AppCompatActivity {
         paramsInformacja.height = btnHeight;
         paramsInformacja.width = btnWidth;
         informacja.setLayoutParams(paramsInformacja);
+        informacja.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), InfoActivity.class);
+                view.getContext().startActivity(intent);
+            }
+        });
     }
 
 }

@@ -16,4 +16,20 @@
     <string name="mapa">Mapa</string>
     <string name="informacja">Informacja</string>
     <string name="tlo">Tlo</string>
+    <string name="opisApp1">
+        To jest aplkacja, która pozwoli Ci na chwilę okazać się w przeszłości.
+        Możesz zobaczyć jak wyglądały różne zabytki kilkadziesiąt, a nawet kilkaset lat temu!
+    </string>
+    <string name="opisApp2">
+        Aby to zrobić, znajdz najbliższą do Ciebie pozycję na mapie i w drogę!
+        Jak tylko będziesz we właściwym miejscu, będziesz mógł zobaczyć zdjęcie,
+        które w tym samym miejscu inna osoba zrobiła wiele lat temu.
+    </string>
+    <string name="opisApp3">
+        Możesz zrobić zdjęcie tego zabytku i porównać z tym historycznym.
+        Wszystkie odkryte zabytki są zapisywane, masz do nich dostęp w każdej chwili.
+    </string>
+    <string name="opisApp4">
+        No cóż… Jesteś gotowy na podróż w przeszłość?
+    </string>
 </resources>
