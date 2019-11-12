@@ -73,7 +73,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_maps_show);
 
         // Get the application context
         Context mContext = getApplicationContext();
