@@ -12,6 +12,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.monumentsguid.Entities.City;
+import com.example.monumentsguid.Entities.Country;
+import com.example.monumentsguid.Entities.Monument;
+import com.example.monumentsguid.Entities.ObservationPoint;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,6 +31,11 @@ import static android.content.ContentValues.TAG;
 public class CountryActivity extends AppCompatActivity {
     // Połaczenie z BD
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    private List<Country> countries;
+    private List<City> cities;
+    private List<Monument> monuments;
+    private List<ObservationPoint> observationPoints;
 
     private List<String> countryNames;
     private List<String> countryImages;
@@ -52,6 +61,11 @@ public class CountryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
+
+        countries = getIntent().getParcelableArrayListExtra("countries");
+        cities = getIntent().getParcelableArrayListExtra("cities");
+        monuments = getIntent().getParcelableArrayListExtra("monuments");
+        observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
 
         // Pobiera rozmiar ekranu urzadzenia
         int screenWidth = getResources().getDisplayMetrics().widthPixels;

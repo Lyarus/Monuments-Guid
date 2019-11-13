@@ -2,6 +2,7 @@ package com.example.monumentsguid;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,20 +54,30 @@ public class MainActivity extends AppCompatActivity {
         int btnHeight = (screenHeight - imageHeight) / 5;
         int btnWidth = screenWidth * 2 / 3;
 
+        // zapisuje pobrane dane do list obiektow
+        getCountryDataFromDB();
+        getCityDataFromDB();
+        getMonumentDataFromDB();
+        getObservationPointDataFromDB();
+
         LinearLayout main_icon = findViewById(R.id.main_icon_layout);
         ViewGroup.LayoutParams paramsMainIcon = main_icon.getLayoutParams();
         paramsMainIcon.height = imageHeight;
         main_icon.setLayoutParams(paramsMainIcon);
 
-        Button odkryte_zabytki = findViewById(R.id.btn_odkryte_zabytki);
-        ViewGroup.LayoutParams paramsOdkryteZabytki = odkryte_zabytki.getLayoutParams();
+        Button zabytki = findViewById(R.id.btn_odkryte_zabytki);
+        ViewGroup.LayoutParams paramsOdkryteZabytki = zabytki.getLayoutParams();
         paramsOdkryteZabytki.height = btnHeight;
         paramsOdkryteZabytki.width = btnWidth;
-        odkryte_zabytki.setLayoutParams(paramsOdkryteZabytki);
-        odkryte_zabytki.setOnClickListener(new View.OnClickListener() {
+        zabytki.setLayoutParams(paramsOdkryteZabytki);
+        zabytki.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), CountryActivity.class);
+                intent.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                intent.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+                intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 view.getContext().startActivity(intent);
             }
         });
@@ -80,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MapsActivity.class);
+                intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 view.getContext().startActivity(intent);
             }
         });
@@ -96,12 +109,6 @@ public class MainActivity extends AppCompatActivity {
                 view.getContext().startActivity(intent);
             }
         });
-
-        getCountryDataFromDB();
-        getCityDataFromDB();
-        getMonumentDataFromDB();
-        getObservationPointDataFromDB();
-
     }
 
     // pobiera dane krajow z BD
