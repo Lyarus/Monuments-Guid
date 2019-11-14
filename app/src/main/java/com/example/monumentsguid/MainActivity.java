@@ -174,13 +174,15 @@ public class MainActivity extends AppCompatActivity {
                                 String id = document.getId();
                                 String name = document.getString("name");
                                 String image = document.getString("image");
+                                String description = document.getString("description");
                                 double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
                                 double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
-                                String cityRef = document.getString("country_ref");
-                                Monument monument = new Monument(id, name, image, lat, lng, cityRef);
+                                String cityRef = document.getString("city_ref");
+                                Monument monument = new Monument(id, name, image, lat, lng, cityRef, description);
                                 monument.setId(id);
                                 monument.setName(name);
                                 monument.setImage(image);
+                                monument.setDescription(description);
                                 monument.setLatitude(lat);
                                 monument.setLongitude(lng);
                                 monument.setCityRef(cityRef);

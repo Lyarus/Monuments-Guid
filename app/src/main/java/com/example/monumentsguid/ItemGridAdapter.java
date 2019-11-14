@@ -19,12 +19,14 @@ public class ItemGridAdapter extends BaseAdapter {
     private List<String> nameList;
     private List<String> imageList;
     private List<String> idList;
+    private Boolean isDefaultImage;
 
-    ItemGridAdapter(Context c, List<String> idList, List<String> nameList, List<String> imageList) {
+    ItemGridAdapter(Context c, List<String> idList, List<String> nameList, List<String> imageList, Boolean isDefaultImage) {
         this.context = c;
         this.nameList = nameList;
         this.imageList = imageList;
         this.idList = idList;
+        this.isDefaultImage = isDefaultImage;
     }
 
     public int getCount() {
@@ -64,6 +66,9 @@ public class ItemGridAdapter extends BaseAdapter {
         if (name != null) {
             //name.setText(nameList.get(position));
             name.setText(Html.fromHtml(nameList.get(position)));
+        }
+        if (image != null && isDefaultImage) {
+            image.setBackgroundResource(R.drawable.default_monument);
         }
         if (image != null && imageList.get(position) != null) {
             new MapsActivity.DownloadImageTask(image).execute(imageList.get(position));

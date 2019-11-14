@@ -7,6 +7,7 @@ public class Monument implements Parcelable {
     public String id;
     public String name;
     public String image;
+    public String description;
     public double latitude;
     public double longitude;
     public String cityRef;
@@ -15,13 +16,14 @@ public class Monument implements Parcelable {
 
     }
 
-    public Monument(String id, String name, String image, double latitude, double longitude, String cityRef) {
+    public Monument(String id, String name, String image, double latitude, double longitude, String cityRef, String description) {
         this.id = id;
         this.name = name;
         this.image = image;
         this.latitude = latitude;
         this.longitude = longitude;
         this.cityRef = cityRef;
+        this.description = description;
     }
 
     public String getId() {
@@ -46,6 +48,20 @@ public class Monument implements Parcelable {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    private Monument(Parcel in) {
+        this.id = in.readString();
+        this.name = in.readString();
+        this.image = in.readString();
+        this.description = in.readString();
+        this.latitude = in.readDouble();
+        this.longitude = in.readDouble();
+        this.cityRef = in.readString();
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public double getLatitude() {
@@ -84,13 +100,8 @@ public class Monument implements Parcelable {
         }
     };
 
-    protected Monument(Parcel in) {
-        this.id = in.readString();
-        this.name = in.readString();
-        this.image = in.readString();
-        this.latitude = in.readDouble();
-        this.longitude = in.readDouble();
-        this.cityRef = in.readString();
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -103,6 +114,7 @@ public class Monument implements Parcelable {
         dest.writeString(this.id);
         dest.writeString(this.name);
         dest.writeString(this.image);
+        dest.writeString(this.description);
         dest.writeDouble(this.latitude);
         dest.writeDouble(this.longitude);
         dest.writeString(this.cityRef);

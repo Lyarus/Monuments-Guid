@@ -2,43 +2,36 @@ package com.example.monumentsguid;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.example.monumentsguid.Entities.City;
+import com.example.monumentsguid.Entities.Monument;
+import com.example.monumentsguid.Entities.ObservationPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static android.content.ContentValues.TAG;
 
 public class CityActivity extends AppCompatActivity {
 
-    // Połaczenie z BD
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private List<City> cities;
+    private List<Monument> monuments;
+    private List<ObservationPoint> observationPoints;
 
     private List<String> cityNames;
     private List<String> cityImages;
     private List<String> cityIds;
-    private String name;
-    private String image;
-    private String id;
     private String country_ref;
 
     private GridView gridView;
-    private ItemGridAdapter cityAdapter;
     private GridView.OnItemClickListener gridViewOnItemClickListener = new GridView.OnItemClickListener() {
 
         @Override
@@ -46,6 +39,8 @@ public class CityActivity extends AppCompatActivity {
             Intent i = new Intent(getApplicationContext(),
                     MonumentActivity.class);
             i.putExtra("id", cityIds.get(position));
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             startActivity(i);
         }
     };
@@ -54,6 +49,10 @@ public class CityActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
+
+        cities = getIntent().getParcelableArrayListExtra("cities");
+        monuments = getIntent().getParcelableArrayListExtra("monuments");
+        observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
 
         // Pobiera rozmiar ekranu urzadzenia
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -74,29 +73,15 @@ public class CityActivity extends AppCompatActivity {
     }
 
     private void addGridItems() {
-        // pobieramy dane z bazy, tworzymy widoki krajów
-        db.collection("city")
-                .whereEqualTo("country_ref", country_ref)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                name = document.getString("name");
-                                image = document.getString("image");
-                                id = document.getId();
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                cityNames.add(name);
-                                cityImages.add(image);
-                                cityIds.add(id);
-                            }
-                            cityAdapter = new ItemGridAdapter(CityActivity.this, cityIds, cityNames, cityImages);
-                            gridView.setAdapter(cityAdapter);
-                            gridView.setOnItemClickListener(gridViewOnItemClickListener);
-                        }
-                    }
-                });
+        for (City city : cities) {
+            if (city.getCountryRef().equals(country_ref)) {
+                cityIds.add(city.getId());
+                cityNames.add(city.getName());
+                cityImages.add(city.getImage());
+            }
+        }
+        ItemGridAdapter cityAdapter = new ItemGridAdapter(CityActivity.this, cityIds, cityNames, cityImages, true);
+        gridView.setAdapter(cityAdapter);
+        gridView.setOnItemClickListener(gridViewOnItemClickListener);
     }
-
 }

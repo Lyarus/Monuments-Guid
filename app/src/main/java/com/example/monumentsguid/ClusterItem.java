@@ -7,13 +7,11 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
     private final LatLng location;
     private String name;
     private String comment;
-    private String description;
 
-    ClusterItem(double lat, double lng, String name, String comment, String description) {
+    ClusterItem(double lat, double lng, String name, String comment) {
         location = new LatLng(lat, lng);
         this.name = name;
         this.comment = comment;
-        this.description = description;
     }
 
     public String getName() {
@@ -30,14 +28,6 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
 
     public String getComment() {
         return comment;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override

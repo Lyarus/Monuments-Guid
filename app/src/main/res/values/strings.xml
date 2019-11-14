@@ -37,4 +37,5 @@
     <string name="miasta">Miasta</string>
     <string name="zabytki">Zabytki</string>
     <string name="title_activity_maps_show">Map</string>
+    <string name="zdj_cie_elementu_grida">Zdjęcie elementu grida</string>
 </resources>

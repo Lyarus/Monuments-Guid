@@ -2,47 +2,37 @@ package com.example.monumentsguid;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.example.monumentsguid.Entities.Monument;
+import com.example.monumentsguid.Entities.ObservationPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static android.content.ContentValues.TAG;
-
-
 public class MonumentActivity extends AppCompatActivity {
 
-    // Połaczenie z BD
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private List<Monument> monuments;
+    private List<ObservationPoint> observationPoints;
 
     private List<String> monumentNames;
     private List<String> monumentImages;
     private List<String> monumentIds;
     private List<Double> monumentLat;
     private List<Double> monumentLng;
-    private String name;
-    private String id;
+    private List<String> monumentDescription;
+
     private String city_ref;
-    private double lat;
-    private double lng;
 
     private GridView gridView;
-    private ItemGridAdapter monumentAdapter;
     private GridView.OnItemClickListener gridViewOnItemClickListener = new GridView.OnItemClickListener() {
 
         @Override
@@ -50,8 +40,12 @@ public class MonumentActivity extends AppCompatActivity {
             Intent i = new Intent(getApplicationContext(),
                     MapsShowActivity.class);
             i.putExtra("id", monumentIds.get(position));
+            i.putExtra("name", monumentNames.get(position));
             i.putExtra("lat", monumentLat.get(position));
             i.putExtra("lng", monumentLng.get(position));
+            i.putExtra("description", monumentDescription.get(position));
+            i.putExtra("image", monumentImages.get(position));
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             startActivity(i);
         }
     };
@@ -60,6 +54,9 @@ public class MonumentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
+
+        monuments = getIntent().getParcelableArrayListExtra("monuments");
+        observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
 
         // Pobiera rozmiar ekranu urzadzenia
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -76,6 +73,7 @@ public class MonumentActivity extends AppCompatActivity {
         city_ref = Objects.requireNonNull(intent.getExtras()).getString("id");
         monumentNames = new ArrayList<>();
         monumentImages = new ArrayList<>();
+        monumentDescription = new ArrayList<>();
         monumentIds = new ArrayList<>();
         monumentLat = new ArrayList<>();
         monumentLng = new ArrayList<>();
@@ -83,32 +81,18 @@ public class MonumentActivity extends AppCompatActivity {
     }
 
     private void addGridItems() {
-        // pobieramy dane z bazy, tworzymy widoki krajów
-        db.collection("monument")
-                .whereEqualTo("city_ref", city_ref)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                name = document.getString("name");
-                                id = document.getId();
-                                lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
-                                lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                monumentNames.add(name);
-                                monumentImages.add("");
-                                monumentIds.add(id);
-                                monumentLat.add(lat);
-                                monumentLng.add(lng);
-                            }
-                            monumentAdapter = new ItemGridAdapter(MonumentActivity.this, monumentIds, monumentNames, monumentImages);
-                            gridView.setAdapter(monumentAdapter);
-                            gridView.setOnItemClickListener(gridViewOnItemClickListener);
-                        }
-                    }
-                });
+        for (Monument monument : monuments) {
+            if (monument.getCityRef().equals(city_ref)) {
+                monumentIds.add(monument.getId());
+                monumentNames.add(monument.getName());
+                monumentImages.add(monument.getImage());
+                monumentDescription.add(monument.getDescription());
+                monumentLat.add(monument.getLatitude());
+                monumentLng.add(monument.getLongitude());
+            }
+        }
+        ItemGridAdapter monumentAdapter = new ItemGridAdapter(MonumentActivity.this, monumentIds, monumentNames, monumentImages, false);
+        gridView.setAdapter(monumentAdapter);
+        gridView.setOnItemClickListener(gridViewOnItemClickListener);
     }
-
 }

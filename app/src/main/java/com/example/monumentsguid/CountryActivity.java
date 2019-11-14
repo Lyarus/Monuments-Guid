@@ -2,35 +2,25 @@ package com.example.monumentsguid;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.monumentsguid.Entities.City;
 import com.example.monumentsguid.Entities.Country;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import static android.content.ContentValues.TAG;
 
 public class CountryActivity extends AppCompatActivity {
-    // Połaczenie z BD
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private List<Country> countries;
     private List<City> cities;
@@ -40,12 +30,8 @@ public class CountryActivity extends AppCompatActivity {
     private List<String> countryNames;
     private List<String> countryImages;
     private List<String> countryIds;
-    private String name;
-    private String image;
-    private String id;
 
     private GridView gridView;
-    private ItemGridAdapter countryAdapter;
     private GridView.OnItemClickListener gridViewOnItemClickListener = new GridView.OnItemClickListener() {
 
         @Override
@@ -53,6 +39,9 @@ public class CountryActivity extends AppCompatActivity {
             Intent i = new Intent(getApplicationContext(),
                     CityActivity.class);
             i.putExtra("id", countryIds.get(position));
+            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             startActivity(i);
         }
     };
@@ -84,27 +73,14 @@ public class CountryActivity extends AppCompatActivity {
     }
 
     private void addGridItems() {
-        // pobieramy dane z bazy, tworzymy widoki krajów
-        db.collection("country")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                name = document.getString("name");
-                                image = document.getString("image");
-                                id = document.getId();
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                countryNames.add(name);
-                                countryImages.add(image);
-                                countryIds.add(id);
-                            }
-                            countryAdapter = new ItemGridAdapter(CountryActivity.this, countryIds, countryNames, countryImages);
-                            gridView.setAdapter(countryAdapter);
-                            gridView.setOnItemClickListener(gridViewOnItemClickListener);
-                        }
-                    }
-                });
+        for (Country country : countries) {
+            countryIds.add(country.getId());
+            countryNames.add(country.getName());
+            countryImages.add(country.getImage());
+        }
+        ItemGridAdapter countryAdapter = new ItemGridAdapter(CountryActivity.this, countryIds, countryNames, countryImages, true);
+        gridView.setAdapter(countryAdapter);
+        gridView.setOnItemClickListener(gridViewOnItemClickListener);
     }
+
 }

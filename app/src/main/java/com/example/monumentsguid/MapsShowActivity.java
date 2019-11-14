@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,32 +18,26 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.example.monumentsguid.Entities.ObservationPoint;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.util.List;
 import java.util.Objects;
 
 public class MapsShowActivity extends FragmentActivity implements OnMapReadyCallback {
+    private List<ObservationPoint> observationPoints;
 
-    private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 13;
     private final LatLng mDefaultLocation = new LatLng(51.098781, 17.036716);
     // rozmiar ekranu urzadzenia
     int screenHeight;
     int screenWidth;
     int screenOrientation;
-    // Połaczenie z BD
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private GoogleMap mMap;
     // elementy
     private FrameLayout layoutMapa;
     private Button btnLeft;
@@ -54,12 +47,15 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     private int btnBottomWidth;
     private int imageLayoutHeight;
     private PopupWindow mPopupWindow;
-    private String title;
+    private String id;
+    private String monument_image;
     private String comment;
     private String image;
     private String description;
     private double lat;
     private double lng;
+    private String name;
+    private String year;
     private LatLng location;
     private String monument_ref;
     private boolean showPopupInfo;
@@ -74,6 +70,20 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_show);
+
+        Intent intent = getIntent();
+        observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
+        monument_ref = Objects.requireNonNull(intent.getExtras()).getString("id");
+        monument_image = Objects.requireNonNull(intent.getExtras()).getString("image");
+        if (monument_image != null && monument_image.equals("")) {
+            monument_image = null;
+        }
+        lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
+        lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
+        name = Objects.requireNonNull(intent.getExtras()).getString("name");
+        description = Objects.requireNonNull(intent.getExtras()).getString("description");
+
+        location = new LatLng(lat, lng);
 
         // Get the application context
         Context mContext = getApplicationContext();
@@ -107,12 +117,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
         customView = null;
         showPopupInfo = false;
-
-        Intent intent = getIntent();
-        monument_ref = Objects.requireNonNull(intent.getExtras()).getString("id");
-        lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
-        lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
-        location = new LatLng(lat, lng);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -165,22 +169,21 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
             }
-            setPopupWindowContent(customView, popupWidth, popupHeight, title, image, description);
+            setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description);
         }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
         if (location != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
         } else {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
         }
 
         // Reaguje na klikniecie na mape
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
                 btnLeft.setVisibility(View.INVISIBLE);
@@ -201,84 +204,77 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         });
 
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
-        mClusterManager = new ClusterManager<>(this, mMap);
-        mClusterManager.setRenderer(new MarkerClusterRenderer(this, mMap, mClusterManager));
-        mMap.setOnCameraIdleListener(mClusterManager);
-        mMap.setOnMarkerClickListener(mClusterManager);
-        mMap.setOnInfoWindowClickListener(mClusterManager);
+        mClusterManager = new ClusterManager<>(this, googleMap);
+        mClusterManager.setRenderer(new MarkerClusterRenderer(this, googleMap, mClusterManager));
+        googleMap.setOnCameraIdleListener(mClusterManager);
+        googleMap.setOnMarkerClickListener(mClusterManager);
+        googleMap.setOnInfoWindowClickListener(mClusterManager);
         addClusterItems();
         mClusterManager.cluster();
 
         // Buduje okno informacyjne
         CustomInfoWindowGoogleMap customInfoWindowGoogleMap = new CustomInfoWindowGoogleMap(getApplicationContext());
-        mMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
+        googleMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
     }
 
     /**
      * Dodaje markery zabytkow na mape (pobiera z bazy)
      */
     private void addClusterItems() {
+        for (final ObservationPoint observationPoint : observationPoints) {
+            if (observationPoint.getMonumentRef().equals(monument_ref)) {
+                id = observationPoint.getId();
+                lat = observationPoint.getLatitude();
+                lng = observationPoint.getLongitude();
+                comment = observationPoint.getComment();
+                year = observationPoint.getYear();
+                image = observationPoint.getImage();
+                mClusterManager.addItem(new ClusterItem(lat, lng, name, comment));
+                mClusterManager.setOnClusterItemInfoWindowClickListener(
+                        new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
+                            @Override
+                            public void onClusterItemInfoWindowClick(ClusterItem ClusterItem) {
+                                // Wstawia wartosc prycisku Info - pokazuje pzycisk
+                                btnLeft.setText(R.string.info);
+                                final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
+                                paramsInfo.width = btnBottomWidth;
+                                btnLeft.setLayoutParams(paramsInfo);
+                                btnLeft.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        showPopupInfo = true;
+                                        customView = null;
+                                        if (inflater != null) {
+                                            customView = inflater.inflate(R.layout.popup_info, null);
+                                        }
+                                        setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description);
+                                    }
+                                });
+                                btnLeft.setVisibility(View.VISIBLE);
 
-        // dodaje markery zabytkow na mape (pobiera z bazy)
-        db.collection("observation_point")
-                .whereEqualTo("monument_ref", monument_ref)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                title = document.getString("name");
-                                comment = document.getString("comment");
-                                image = document.getString("image_ref");
-                                description = document.getString("description");
-                                lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
-                                lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
-                                mClusterManager.addItem(new ClusterItem(lat, lng, title, comment, description));
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                mClusterManager.setOnClusterItemInfoWindowClickListener(
-                                        new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
-                                            @Override
-                                            public void onClusterItemInfoWindowClick(ClusterItem ClusterItem) {
-                                                // Wstawia wartosc prycisku Info - pokazuje pzycisk
-                                                btnLeft.setText(R.string.info);
-                                                final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
-                                                paramsInfo.width = btnBottomWidth;
-                                                btnLeft.setLayoutParams(paramsInfo);
-                                                // Set a click listener for the text view
-                                                btnLeft.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-                                                        showPopupInfo = true;
-                                                        customView = null;
-                                                        if (inflater != null) {
-                                                            customView = inflater.inflate(R.layout.popup_info, null);
-                                                        }
-                                                        setPopupWindowContent(customView, popupWidth, popupHeight, title, image, description);
-                                                    }
-                                                });
-                                                btnLeft.setVisibility(View.VISIBLE);
-
-                                                // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
-                                                btnRight.setText(R.string.wybierz);
-                                                final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
-                                                paramsWybierz.width = btnBottomWidth;
-                                                btnRight.setLayoutParams(paramsWybierz);
-                                                btnRight.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View v) {
-
-                                                    }
-                                                });
-                                                btnRight.setVisibility(View.VISIBLE);
-                                            }
-                                        });
+                                // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
+                                btnRight.setText(R.string.wybierz);
+                                final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
+                                paramsWybierz.width = btnBottomWidth;
+                                btnRight.setLayoutParams(paramsWybierz);
+                                btnRight.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent i = new Intent(getApplicationContext(),
+                                                ObservationPointDetailsActivity.class);
+                                        i.putExtra("id", id);
+                                        i.putExtra("comment", comment);
+                                        i.putExtra("name", name);
+                                        i.putExtra("year", year);
+                                        i.putExtra("image", image);
+                                        startActivity(i);
+                                    }
+                                });
+                                btnRight.setVisibility(View.VISIBLE);
                             }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
+                        });
+            }
+        }
     }
 
     /**
@@ -332,5 +328,4 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         btnRight.setEnabled(false);
         btnMenu.setEnabled(false);
     }
-
 }
