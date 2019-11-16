@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,11 +27,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class MapsShowActivity extends FragmentActivity implements OnMapReadyCallback {
     private List<ObservationPoint> observationPoints;
+    private List<ObservationPoint> monuments;
 
     private static final int DEFAULT_ZOOM = 13;
     private final LatLng mDefaultLocation = new LatLng(51.098781, 17.036716);
@@ -43,6 +46,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     private Button btnLeft;
     private Button btnRight;
     private Button btnMenu;
+    private Button btnCenter;
     private int btnMenuWidth;
     private int btnBottomWidth;
     private int imageLayoutHeight;
@@ -73,6 +77,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
 
         Intent intent = getIntent();
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
+        monuments = getIntent().getParcelableArrayListExtra("monuments");
         monument_ref = Objects.requireNonNull(intent.getExtras()).getString("id");
         monument_image = Objects.requireNonNull(intent.getExtras()).getString("image");
         if (monument_image != null && monument_image.equals("")) {
@@ -112,6 +117,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         layoutMapa = findViewById(R.id.mapa);
         btnLeft = findViewById(R.id.btn_info);
         btnRight = findViewById(R.id.btn_trasa);
+        btnCenter = findViewById(R.id.btn_szczegoly);
         btnMenu = findViewById(R.id.btn_menu);
 
         inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -188,6 +194,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             public void onMapClick(LatLng point) {
                 btnLeft.setVisibility(View.INVISIBLE);
                 btnRight.setVisibility(View.INVISIBLE);
+                btnCenter.setVisibility(View.INVISIBLE);
             }
         });
 
@@ -235,7 +242,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                             @Override
                             public void onClusterItemInfoWindowClick(ClusterItem ClusterItem) {
                                 // Wstawia wartosc prycisku Info - pokazuje pzycisk
-                                btnLeft.setText(R.string.info);
                                 final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
                                 paramsInfo.width = btnBottomWidth;
                                 btnLeft.setLayoutParams(paramsInfo);
@@ -252,12 +258,11 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                                 });
                                 btnLeft.setVisibility(View.VISIBLE);
 
-                                // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
-                                btnRight.setText(R.string.wybierz);
-                                final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
-                                paramsWybierz.width = btnBottomWidth;
-                                btnRight.setLayoutParams(paramsWybierz);
-                                btnRight.setOnClickListener(new View.OnClickListener() {
+                                // Wstawia wartosc prycisku Szczegóły - pokazuje pzycisk
+                                final ViewGroup.LayoutParams paramsSzczegoly = btnCenter.getLayoutParams();
+                                paramsSzczegoly.width = btnBottomWidth;
+                                btnCenter.setLayoutParams(paramsSzczegoly);
+                                btnCenter.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         Intent i = new Intent(getApplicationContext(),
@@ -270,7 +275,27 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                                         startActivity(i);
                                     }
                                 });
+                                btnCenter.setVisibility(View.VISIBLE);
+
+                                // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
+                                final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
+                                paramsWybierz.width = btnBottomWidth;
+                                btnRight.setLayoutParams(paramsWybierz);
+                                btnRight.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent i = new Intent(getApplicationContext(),
+                                                MapsActivity.class);
+                                        i.putExtra("lat", lat);
+                                        i.putExtra("lng", lng);
+                                        i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                                        i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                                        startActivity(i);
+                                    }
+                                });
                                 btnRight.setVisibility(View.VISIBLE);
+
+
                             }
                         });
             }

@@ -38,4 +38,7 @@
     <string name="zabytki">Zabytki</string>
     <string name="title_activity_maps_show">Map</string>
     <string name="zdj_cie_elementu_grida">Zdjęcie elementu grida</string>
+    <string name="historyczne_zdj_cie_z_bazy_danych">Historyczne zdjęcie z bazy danych</string>
+    <string name="por_wnaj">Porównaj</string>
+    <string name="szczeg_y">Szczegóły</string>
 </resources>

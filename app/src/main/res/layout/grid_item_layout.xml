@@ -31,7 +31,8 @@
             android:paddingStart="10sp"
             android:paddingTop="5sp"
             android:paddingEnd="10sp"
-            android:paddingBottom="5sp" />
+            android:paddingBottom="10sp"
+            android:src="@drawable/default_monument" />
 
     </FrameLayout>
 

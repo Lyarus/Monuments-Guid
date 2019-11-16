@@ -48,8 +48,6 @@ public class ItemGridAdapter extends BaseAdapter {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View gridView;
         if (convertView == null) {
-            //int screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
-            //int size = screenWidth * 2 / 7;
             gridView = new View(context);
             if (inflater != null) {
                 gridView = inflater.inflate(R.layout.grid_item_layout, null);
@@ -64,13 +62,12 @@ public class ItemGridAdapter extends BaseAdapter {
             gridView = convertView;
         }
         if (name != null) {
-            //name.setText(nameList.get(position));
             name.setText(Html.fromHtml(nameList.get(position)));
         }
-        if (image != null && isDefaultImage) {
-            image.setBackgroundResource(R.drawable.default_monument);
+        if (image != null && !isDefaultImage) {
+            image.setImageResource(0);
         }
-        if (image != null && imageList.get(position) != null) {
+        if (image != null && imageList.size() != 0 && imageList.get(position) != null) {
             new MapsActivity.DownloadImageTask(image).execute(imageList.get(position));
         }
         return gridView;

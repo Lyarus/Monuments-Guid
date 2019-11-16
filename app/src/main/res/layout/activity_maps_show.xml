@@ -41,6 +41,21 @@
             android:background="@drawable/rounded_corners_button"
             android:layout_alignParentStart="true"
             android:textColor="@color/colorTextLight"
+            android:text="@string/info"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/btn_szczegoly"
+            style="@android:style/Widget.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="5pt"
+            android:background="@drawable/rounded_corners_button"
+            android:text="@string/szczeg_y"
+            android:textColor="@color/colorTextLight"
             android:visibility="invisible" />
 
         <Button
@@ -55,6 +70,7 @@
             android:layout_marginBottom="5pt"
             android:background="@drawable/rounded_corners_button"
             android:textColor="@color/colorTextLight"
+            android:text="@string/wybierz"
             android:visibility="invisible" />
     </RelativeLayout>
 </FrameLayout>

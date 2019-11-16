@@ -15,6 +15,7 @@ import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +47,7 @@ public class MonumentActivity extends AppCompatActivity {
             i.putExtra("description", monumentDescription.get(position));
             i.putExtra("image", monumentImages.get(position));
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
             startActivity(i);
         }
     };
@@ -91,7 +93,7 @@ public class MonumentActivity extends AppCompatActivity {
                 monumentLng.add(monument.getLongitude());
             }
         }
-        ItemGridAdapter monumentAdapter = new ItemGridAdapter(MonumentActivity.this, monumentIds, monumentNames, monumentImages, false);
+        ItemGridAdapter monumentAdapter = new ItemGridAdapter(MonumentActivity.this, monumentIds, monumentNames, Collections.<String>emptyList(), false);
         gridView.setAdapter(monumentAdapter);
         gridView.setOnItemClickListener(gridViewOnItemClickListener);
     }

@@ -43,7 +43,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.maps.android.clustering.ClusterManager;
 
 import org.json.JSONObject;
@@ -63,7 +62,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 13;
-    private final LatLng mDefaultLocation = new LatLng(51.098781, 17.036716);
+    private LatLng mDefaultLocation;
 
     private GoogleMap mMap;
     private Context mContext;
@@ -92,6 +91,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String description;
     private double lat;
     private double lng;
+    private double latFromDetails;
+    private double lngFromDetails;
     private Polyline mPolyline;
     private LatLng mOrigin;
     private LatLng mDestination;
@@ -102,8 +103,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    // Połaczenie z BD
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
@@ -124,8 +123,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        latFromDetails = 0.0;
+        lngFromDetails = 0.0;
+
+        Intent intent = getIntent();
+        latFromDetails = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
+        lngFromDetails = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
+
+        if (latFromDetails != 0.0 && lngFromDetails != 0.0) {
+            mDefaultLocation = new LatLng(latFromDetails, lngFromDetails);
+        } else {
+            mDefaultLocation = new LatLng(51.098781, 17.036716);
+        }
 
         // Get the application context
         mContext = getApplicationContext();
