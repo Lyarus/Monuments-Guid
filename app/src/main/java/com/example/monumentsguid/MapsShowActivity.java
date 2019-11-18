@@ -236,7 +236,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                 comment = observationPoint.getComment();
                 year = observationPoint.getYear();
                 image = observationPoint.getImage();
-                mClusterManager.addItem(new ClusterItem(lat, lng, name, comment));
+                mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, null, null));
                 mClusterManager.setOnClusterItemInfoWindowClickListener(
                         new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                             @Override
