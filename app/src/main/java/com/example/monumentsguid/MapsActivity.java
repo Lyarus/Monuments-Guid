@@ -90,7 +90,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Polyline mPolyline;
     private LatLng mOrigin;
     private LatLng mDestination;
-    //private View customView;
     private LayoutInflater inflater;
     private int popupWidth;
     private int popupHeight;
@@ -229,7 +228,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Jezeli przy obróceniu ekrana popup był widoczny
         if (showPopupInfo) {
             // Zeruje poprzedni popup
-            View customView = null;
+            View customView;
             mPopupWindow.dismiss();
             //Tworzy nowy
             Button btnLeft = findViewById(R.id.btn_info);
@@ -242,7 +241,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
-
 
     /**
      * Manipulates the map once available.
@@ -362,7 +360,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnRight.setVisibility(View.VISIBLE);
 
         // Wstawia wartosc prycisku Info - pokazuje pzycisk
-        btnLeft.setText(R.string.info);
         final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
         paramsInfo.width = btnBottomWidth;
         btnLeft.setLayoutParams(paramsInfo);
@@ -378,7 +375,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
         btnLeft.setVisibility(View.VISIBLE);
     }
-
 
     /**
      * Dodaje markery zabytkow na mape
@@ -407,7 +403,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     monument_image = null;
                 }
             }
-            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description));
+            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, null, null, id));
             mClusterManager.setOnClusterItemInfoWindowClickListener(
                     new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                         @Override
@@ -421,11 +417,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             curLng = lng;
                             Button btnLeft = findViewById(R.id.btn_info);
                             Button btnRight = findViewById(R.id.btn_trasa);
-                            View customView = null;
+                            View customView;
                             if (inflater != null) {
                                 customView = inflater.inflate(R.layout.popup_info, null);
+                                createBottomBtns(btnLeft, btnRight, lat, lng, name, monument_image, description, customView);
                             }
-                            createBottomBtns(btnLeft, btnRight, lat, lng, name, monument_image, description, customView);
                         }
                     });
         }
@@ -466,7 +462,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         updateLocationUI();
     }
-
 
     private LatLng getMyLocation() {
         // Getting LocationManager object from System Service LOCATION_SERVICE

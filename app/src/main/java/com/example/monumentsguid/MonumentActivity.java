@@ -40,7 +40,6 @@ public class MonumentActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent i = new Intent(getApplicationContext(),
                     MapsShowActivity.class);
-            i.putExtra("id", monumentIds.get(position));
             i.putExtra("name", monumentNames.get(position));
             i.putExtra("lat", monumentLat.get(position));
             i.putExtra("lng", monumentLng.get(position));

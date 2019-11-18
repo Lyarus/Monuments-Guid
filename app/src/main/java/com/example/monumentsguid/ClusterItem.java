@@ -9,13 +9,27 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
     private String comment;
     private String monument_image;
     private String description;
+    private String image;
+    private String year;
+    private String id;
 
-    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition) {
+    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id) {
+        this.image = image;
+        this.year = year;
+        this.id = id;
         location = new LatLng(lat, lng);
         this.name = name;
         this.comment = comment;
         this.monument_image = monument_image;
         this.description = descrition;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -63,5 +77,21 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
     }
 }

@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,7 +34,7 @@ import java.util.Objects;
 
 public class MapsShowActivity extends FragmentActivity implements OnMapReadyCallback {
     private List<ObservationPoint> observationPoints;
-    private List<ObservationPoint> monuments;
+    private List<Monument> monuments;
 
     private static final int DEFAULT_ZOOM = 13;
     private final LatLng mDefaultLocation = new LatLng(51.098781, 17.036716);
@@ -43,27 +44,22 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     int screenOrientation;
     // elementy
     private FrameLayout layoutMapa;
-    private Button btnLeft;
-    private Button btnRight;
     private Button btnMenu;
-    private Button btnCenter;
     private int btnMenuWidth;
     private int btnBottomWidth;
     private int imageLayoutHeight;
     private PopupWindow mPopupWindow;
-    private String id;
+    private String curId;
+    private String curComment;
+    private double curLat;
+    private double curLng;
+    private String curImage;
+    private String curYear;
     private String monument_image;
-    private String comment;
-    private String image;
     private String description;
-    private double lat;
-    private double lng;
     private String name;
-    private String year;
     private LatLng location;
-    private String monument_ref;
     private boolean showPopupInfo;
-    private View customView;
     private LayoutInflater inflater;
     private int popupWidth;
     private int popupHeight;
@@ -78,13 +74,12 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         Intent intent = getIntent();
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
         monuments = getIntent().getParcelableArrayListExtra("monuments");
-        monument_ref = Objects.requireNonNull(intent.getExtras()).getString("id");
         monument_image = Objects.requireNonNull(intent.getExtras()).getString("image");
         if (monument_image != null && monument_image.equals("")) {
             monument_image = null;
         }
-        lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
-        lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
+        double lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
+        double lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         name = Objects.requireNonNull(intent.getExtras()).getString("name");
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
 
@@ -115,13 +110,9 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
 
         // Definiuje wszystkie obiekty
         layoutMapa = findViewById(R.id.mapa);
-        btnLeft = findViewById(R.id.btn_info);
-        btnRight = findViewById(R.id.btn_trasa);
-        btnCenter = findViewById(R.id.btn_szczegoly);
         btnMenu = findViewById(R.id.btn_menu);
 
         inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-        customView = null;
         showPopupInfo = false;
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -166,22 +157,38 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                 imageLayoutHeight = screenHeight / 3;
             }
         }
+
         // Jezeli przy obróceniu ekrana popup był widoczny
         if (showPopupInfo) {
             // Zeruje poprzedni popup
-            customView = null;
+            View customView;
             mPopupWindow.dismiss();
             //Tworzy nowy
+            Button btnLeft = findViewById(R.id.btn_info);
+            Button btnRight = findViewById(R.id.btn_trasa);
+            Button btnCenter = findViewById(R.id.btn_szczegoly);
+
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
+                createBottomBtns(btnLeft, btnCenter, btnRight, curId, curComment, curLat, curLng, name, monument_image, description, curImage, curYear, customView);
+                setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnRight, btnCenter);
             }
-            setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description);
         }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         googleMap.getUiSettings().setMapToolbarEnabled(false);
+
+        // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
+        mClusterManager = new ClusterManager<>(this, googleMap);
+        mClusterManager.setRenderer(new MarkerClusterRenderer(this, googleMap, mClusterManager));
+        googleMap.setOnCameraIdleListener(mClusterManager);
+        googleMap.setOnMarkerClickListener(mClusterManager);
+        googleMap.setOnInfoWindowClickListener(mClusterManager);
+        addClusterItems();
+        mClusterManager.cluster();
+
         if (location != null) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
         } else {
@@ -192,8 +199,11 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
+                Button btnLeft = findViewById(R.id.btn_info);
                 btnLeft.setVisibility(View.INVISIBLE);
+                Button btnRight = findViewById(R.id.btn_trasa);
                 btnRight.setVisibility(View.INVISIBLE);
+                Button btnCenter = findViewById(R.id.btn_szczegoly);
                 btnCenter.setVisibility(View.INVISIBLE);
             }
         });
@@ -210,15 +220,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             }
         });
 
-        // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
-        mClusterManager = new ClusterManager<>(this, googleMap);
-        mClusterManager.setRenderer(new MarkerClusterRenderer(this, googleMap, mClusterManager));
-        googleMap.setOnCameraIdleListener(mClusterManager);
-        googleMap.setOnMarkerClickListener(mClusterManager);
-        googleMap.setOnInfoWindowClickListener(mClusterManager);
-        addClusterItems();
-        mClusterManager.cluster();
-
         // Buduje okno informacyjne
         CustomInfoWindowGoogleMap customInfoWindowGoogleMap = new CustomInfoWindowGoogleMap(getApplicationContext());
         googleMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
@@ -229,83 +230,105 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
      */
     private void addClusterItems() {
         for (final ObservationPoint observationPoint : observationPoints) {
-            if (observationPoint.getMonumentRef().equals(monument_ref)) {
-                id = observationPoint.getId();
-                lat = observationPoint.getLatitude();
-                lng = observationPoint.getLongitude();
-                comment = observationPoint.getComment();
-                year = observationPoint.getYear();
-                image = observationPoint.getImage();
-                mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, null, null));
-                mClusterManager.setOnClusterItemInfoWindowClickListener(
-                        new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
-                            @Override
-                            public void onClusterItemInfoWindowClick(ClusterItem ClusterItem) {
-                                // Wstawia wartosc prycisku Info - pokazuje pzycisk
-                                final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
-                                paramsInfo.width = btnBottomWidth;
-                                btnLeft.setLayoutParams(paramsInfo);
-                                btnLeft.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        showPopupInfo = true;
-                                        customView = null;
-                                        if (inflater != null) {
-                                            customView = inflater.inflate(R.layout.popup_info, null);
-                                        }
-                                        setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description);
-                                    }
-                                });
-                                btnLeft.setVisibility(View.VISIBLE);
-
-                                // Wstawia wartosc prycisku Szczegóły - pokazuje pzycisk
-                                final ViewGroup.LayoutParams paramsSzczegoly = btnCenter.getLayoutParams();
-                                paramsSzczegoly.width = btnBottomWidth;
-                                btnCenter.setLayoutParams(paramsSzczegoly);
-                                btnCenter.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        Intent i = new Intent(getApplicationContext(),
-                                                ObservationPointDetailsActivity.class);
-                                        i.putExtra("id", id);
-                                        i.putExtra("comment", comment);
-                                        i.putExtra("name", name);
-                                        i.putExtra("year", year);
-                                        i.putExtra("image", image);
-                                        startActivity(i);
-                                    }
-                                });
-                                btnCenter.setVisibility(View.VISIBLE);
-
-                                // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
-                                final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
-                                paramsWybierz.width = btnBottomWidth;
-                                btnRight.setLayoutParams(paramsWybierz);
-                                btnRight.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        Intent i = new Intent(getApplicationContext(),
-                                                MapsActivity.class);
-                                        i.putExtra("lat", lat);
-                                        i.putExtra("lng", lng);
-                                        i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
-                                        i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
-                                        startActivity(i);
-                                    }
-                                });
-                                btnRight.setVisibility(View.VISIBLE);
-
-
+            String id = observationPoint.getId();
+            double lat = observationPoint.getLatitude();
+            double lng = observationPoint.getLongitude();
+            String comment = observationPoint.getComment();
+            String image = observationPoint.getImage();
+            String year = observationPoint.getYear();
+            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, image, year, id));
+            mClusterManager.setOnClusterItemInfoWindowClickListener(
+                    new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
+                        @Override
+                        public void onClusterItemInfoWindowClick(ClusterItem ClusterItem) {
+                            String id = ClusterItem.getId();
+                            String name = ClusterItem.getName();
+                            String comment = ClusterItem.getComment();
+                            String monument_image = ClusterItem.getMonument_image();
+                            String description = ClusterItem.getDescription();
+                            double lat = ClusterItem.getPosition().latitude;
+                            double lng = ClusterItem.getPosition().longitude;
+                            String image = ClusterItem.getImage();
+                            String year = ClusterItem.getYear();
+                            curId = id;
+                            curComment = comment;
+                            curLat = lat;
+                            curLng = lng;
+                            curImage = image;
+                            curYear = year;
+                            Button btnLeft = findViewById(R.id.btn_info);
+                            Button btnRight = findViewById(R.id.btn_trasa);
+                            Button btnCenter = findViewById(R.id.btn_szczegoly);
+                            View customView;
+                            if (inflater != null) {
+                                customView = inflater.inflate(R.layout.popup_info, null);
+                                createBottomBtns(btnLeft, btnCenter, btnRight, id, comment, lat, lng, name, monument_image, description, image, year, customView);
                             }
-                        });
-            }
+                        }
+                    });
         }
     }
+
+
+    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final String id, final String comment, final double lat, final double lng, final String name, final String monument_image, final String description, final String image, final String year, final View customView) {
+        // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
+        final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
+        paramsWybierz.width = btnBottomWidth;
+        btnRight.setLayoutParams(paramsWybierz);
+        btnRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(),
+                        MapsActivity.class);
+                i.putExtra("lat", lat);
+                i.putExtra("lng", lng);
+                i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                startActivity(i);
+            }
+        });
+        btnRight.setVisibility(View.VISIBLE);
+
+        // Wstawia wartosc prycisku Szczegóły - pokazuje pzycisk
+        final ViewGroup.LayoutParams paramsSzczegoly = btnCenter.getLayoutParams();
+        paramsSzczegoly.width = btnBottomWidth;
+        btnCenter.setLayoutParams(paramsSzczegoly);
+        btnCenter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(),
+                        ObservationPointDetailsActivity.class);
+                i.putExtra("id", id);
+                i.putExtra("comment", comment);
+                i.putExtra("name", name);
+                i.putExtra("year", year);
+                i.putExtra("image", image);
+                startActivity(i);
+            }
+        });
+        btnCenter.setVisibility(View.VISIBLE);
+
+        // Wstawia wartosc prycisku Info - pokazuje pzycisk
+        final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();
+        paramsInfo.width = btnBottomWidth;
+        btnLeft.setLayoutParams(paramsInfo);
+        btnLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPopupInfo = true;
+                if (inflater != null) {
+                    setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnRight, btnCenter);
+                }
+            }
+        });
+        btnLeft.setVisibility(View.VISIBLE);
+    }
+
 
     /**
      * Tworzy popup z informacja o zabytku
      */
-    private void setPopupWindowContent(View view, int width, int height, String title, String image, String description) {
+    private void setPopupWindowContent(View view, int width, int height, String title, String image, String description, Button btnLeft, Button btnRight, Button btnCenter) {
         // Tworzy popup
         mPopupWindow = new PopupWindow(view, width, height);
         mPopupWindow.setElevation(5.0f);
@@ -315,12 +338,12 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         ImageView infoImage = null;
         TextView infoDescription = null;
         LinearLayout imageLayout = null;
-        if (customView != null) {
-            infoTitle = customView.findViewById(R.id.info_text_title);
-            infoImage = customView.findViewById(R.id.info_image);
-            infoDescription = customView.findViewById(R.id.info_text_description);
-            btnClose = customView.findViewById(R.id.close);
-            imageLayout = customView.findViewById(R.id.info_image_layout);
+        if (view != null) {
+            infoTitle = view.findViewById(R.id.info_text_title);
+            infoImage = view.findViewById(R.id.info_image);
+            infoDescription = view.findViewById(R.id.info_text_description);
+            btnClose = view.findViewById(R.id.close);
+            imageLayout = view.findViewById(R.id.info_image_layout);
         }
         if (btnClose != null && infoTitle != null && infoImage != null && infoDescription != null) {
             // Wstawia nagłówek
@@ -341,8 +364,12 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                     // Dismiss the popup window
                     mPopupWindow.dismiss();
                     showPopupInfo = false;
+                    Button btnLeft = findViewById(R.id.btn_info);
+                    Button btnRight = findViewById(R.id.btn_trasa);
+                    Button btnCenter = findViewById(R.id.btn_szczegoly);
                     btnLeft.setEnabled(true);
                     btnRight.setEnabled(true);
+                    btnCenter.setEnabled(true);
                     btnMenu.setEnabled(true);
                 }
             });
@@ -351,6 +378,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
         btnLeft.setEnabled(false);
         btnRight.setEnabled(false);
+        btnCenter.setEnabled(false);
         btnMenu.setEnabled(false);
     }
 }
