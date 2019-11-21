@@ -3,6 +3,7 @@
     <string name="title_activity_maps">Map</string>
     <string name="info">Info</string>
     <string name="wybierz">Wybierz</string>
+    <string name="trasa">Trasa</string>
     <string name="pokaz">Pokaż</string>
     <string name="zdjecie">Zdjęcie</string>
     <string name="menu">Menu</string>
@@ -42,4 +43,5 @@
     <string name="historyczne_zdj_cie_z_bazy_danych">Historyczne zdjęcie z bazy danych</string>
     <string name="por_wnaj">Porównaj</string>
     <string name="szczeg_y">Szczegóły</string>
+    <string name="toast_na_miejscu">Jesteśmy na miejscu i możemy zrobić zdjęcie!</string>
 </resources>

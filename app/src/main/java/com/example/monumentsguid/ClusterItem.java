@@ -12,11 +12,13 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
     private String image;
     private String year;
     private String id;
+    private int radius;
 
-    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id) {
+    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id, int radius) {
         this.image = image;
         this.year = year;
         this.id = id;
+        this.radius = radius;
         location = new LatLng(lat, lng);
         this.name = name;
         this.comment = comment;
@@ -93,5 +95,13 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
 
     public void setYear(String year) {
         this.year = year;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
     }
 }

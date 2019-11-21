@@ -62,6 +62,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 13;
+    private static final int RADIUS = 20;
     private LatLng mDefaultLocation;
 
     private GoogleMap mMap;
@@ -82,6 +83,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int btnBottomWidth;
     private int imageLayoutHeight;
     private PopupWindow mPopupWindow;
+    private boolean isCamera;
     private double curLat;
     private double curLng;
     private String curName;
@@ -233,10 +235,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //Tworzy nowy
             Button btnLeft = findViewById(R.id.btn_info);
             Button btnRight = findViewById(R.id.btn_trasa);
+            Button btnCenter = findViewById(R.id.btn_kamera);
 
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
-                createBottomBtns(btnLeft, btnRight, curLat, curLng, curName, curMonumentImage, curDescription, customView);
+                createBottomBtns(btnLeft, btnCenter, btnRight, curLat, curLng, curName, curMonumentImage, curDescription, customView, isCamera);
                 setPopupWindowContent(customView, popupWidth, popupHeight, curName, curMonumentImage, curDescription, btnLeft, btnRight);
             }
         }
@@ -282,6 +285,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     btnLeft.setVisibility(View.INVISIBLE);
                     Button btnRight = findViewById(R.id.btn_trasa);
                     btnRight.setVisibility(View.INVISIBLE);
+                    Button btnCenter = findViewById(R.id.btn_kamera);
+                    btnCenter.setVisibility(View.INVISIBLE);
 
                 } else {
                     Button btnRight = findViewById(R.id.btn_trasa);
@@ -320,14 +325,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
     }
 
-    private void createBottomBtns(final Button btnLeft, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final View customView) {
+    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final View customView, boolean isCamera) {
         final LatLng curPosition = new LatLng(lat, lng);
+
+        if (isCamera) {
+            final ViewGroup.LayoutParams paramsKamera = btnCenter.getLayoutParams();
+            paramsKamera.width = btnBottomWidth;
+            btnCenter.setLayoutParams(paramsKamera);
+            btnCenter.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // tworzy folder
+                    // wlacza kamere
+                }
+            });
+            btnCenter.setVisibility(View.VISIBLE);
+        }
         // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
-        btnRight.setText(R.string.wybierz);
+        btnRight.setText(R.string.trasa);
         final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
         paramsWybierz.width = btnBottomWidth;
         btnRight.setLayoutParams(paramsWybierz);
-
         if (mDestination == null || !mDestination.equals(curPosition)) {
             btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
         } else {
@@ -353,10 +371,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         btnLeft.setVisibility(View.INVISIBLE);
                         btnRight.setVisibility(View.INVISIBLE);
                         btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
+                        btnCenter.setVisibility(View.INVISIBLE);
                     }
                 }
             }
         });
+
         btnRight.setVisibility(View.VISIBLE);
 
         // Wstawia wartosc prycisku Info - pokazuje pzycisk
@@ -403,7 +423,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     monument_image = null;
                 }
             }
-            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, null, null, id));
+            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, null, null, id, RADIUS));
             mClusterManager.setOnClusterItemInfoWindowClickListener(
                     new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                         @Override
@@ -417,10 +437,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             curLng = lng;
                             Button btnLeft = findViewById(R.id.btn_info);
                             Button btnRight = findViewById(R.id.btn_trasa);
+                            Button btnCenter = findViewById(R.id.btn_kamera);
                             View customView;
+                            isCamera = false;
+                            // reaguje na przyblizenie do punktu
+                            float[] distance = new float[2];
+                            Location.distanceBetween(ClusterItem.getPosition().latitude,
+                                    ClusterItem.getPosition().longitude, mOrigin.latitude,
+                                    mOrigin.longitude, distance);
+
+                            if (distance[0] < ClusterItem.getRadius()) {
+                                Toast.makeText(getApplicationContext(), getString(R.string.toast_na_miejscu), Toast.LENGTH_SHORT).show();
+                                isCamera = true;
+                            } else if (distance[0] >= ClusterItem.getRadius()) {
+                                isCamera = false;
+                            }
                             if (inflater != null) {
                                 customView = inflater.inflate(R.layout.popup_info, null);
-                                createBottomBtns(btnLeft, btnRight, lat, lng, name, monument_image, description, customView);
+                                // przy naciśnięciu na pinezkę tworzymy nowe przyciski i popup
+                                createBottomBtns(btnLeft, btnCenter, btnRight, lat, lng, name, monument_image, description, customView, isCamera);
                             }
                         }
                     });
