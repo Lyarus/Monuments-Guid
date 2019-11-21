@@ -44,4 +44,7 @@
     <string name="por_wnaj">Porównaj</string>
     <string name="szczeg_y">Szczegóły</string>
     <string name="toast_na_miejscu">Jesteśmy na miejscu i możemy zrobić zdjęcie!</string>
+    <string name="wskazowka_naglowek">Wskazówka</string>
+    <string name="wskazowka_tresc_poziomo">Dane zdjęcie należy wykonać, trzymając urządzenie poziomo.</string>
+    <string name="wskazowka_tresc_pionowo">Dane zdjęcie należy wykonać, trzymając urządzenie pionowo.</string>
 </resources>

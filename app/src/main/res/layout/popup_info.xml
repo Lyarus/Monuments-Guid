@@ -85,13 +85,27 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginStart="5sp"
                 android:layout_marginEnd="5sp"
-                android:layout_marginBottom="10sp"
+                android:layout_marginBottom="5sp"
                 android:layout_marginTop="10sp"
                 android:text="@string/brak_opisu"
                 android:textAlignment="center"
                 android:textColor="#000000"
                 android:textSize="18sp" />
 
+            <Button
+                android:id="@+id/ok"
+                style="@android:style/Widget.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/info_text_description"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5pt"
+                android:layout_marginBottom="10sp"
+                android:background="@drawable/rounded_corners_button"
+                android:text="@string/ok"
+                android:textColor="@color/colorTextLight"
+                android:visibility="gone" />
         </RelativeLayout>
     </ScrollView>
 </RelativeLayout>

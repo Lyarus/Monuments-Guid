@@ -236,7 +236,8 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             String comment = observationPoint.getComment();
             String image = observationPoint.getImage();
             String year = observationPoint.getYear();
-            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, image, year, id, 0));
+            boolean isHorizontal = observationPoint.isHorizontal();
+            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, image, year, id, 0, isHorizontal));
             mClusterManager.setOnClusterItemInfoWindowClickListener(
                     new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                         @Override

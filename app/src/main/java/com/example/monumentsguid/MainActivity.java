@@ -210,8 +210,9 @@ public class MainActivity extends AppCompatActivity {
                                 double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
                                 double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
                                 String year = document.getString("year");
+                                boolean isHorizontal = document.getBoolean("isHorizontal");
                                 String monumentRef = document.getString("monument_ref");
-                                ObservationPoint observationPoint = new ObservationPoint(id, comment, image, lat, lng, year, monumentRef);
+                                ObservationPoint observationPoint = new ObservationPoint(id, comment, image, lat, lng, year, isHorizontal, monumentRef);
                                 observationPoint.setId(id);
                                 observationPoint.setComment(comment);
                                 observationPoint.setImage(image);

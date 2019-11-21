@@ -61,6 +61,7 @@ import java.util.Objects;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
+    static final int REQUEST_PICTURE_CAPTURE = 1;
     private static final int DEFAULT_ZOOM = 13;
     private static final int RADIUS = 20;
     private LatLng mDefaultLocation;
@@ -81,11 +82,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnMenu;
     private int btnMenuWidth;
     private int btnBottomWidth;
+    private int btnHeight;
     private int imageLayoutHeight;
     private PopupWindow mPopupWindow;
     private boolean isCamera;
+    private String curPopupMode;
     private double curLat;
     private double curLng;
+    private boolean curIsHorizontal;
     private String curName;
     private String curMonumentImage;
     private String curDescription;
@@ -236,11 +240,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Button btnLeft = findViewById(R.id.btn_info);
             Button btnRight = findViewById(R.id.btn_trasa);
             Button btnCenter = findViewById(R.id.btn_kamera);
-
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
                 createBottomBtns(btnLeft, btnCenter, btnRight, curLat, curLng, curName, curMonumentImage, curDescription, customView, isCamera);
-                setPopupWindowContent(customView, popupWidth, popupHeight, curName, curMonumentImage, curDescription, btnLeft, btnRight);
+                setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, curName, curMonumentImage, curDescription, btnLeft, btnCenter, btnRight);
             }
         }
     }
@@ -327,16 +330,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final View customView, boolean isCamera) {
         final LatLng curPosition = new LatLng(lat, lng);
-
-        if (isCamera) {
+        // Jeżeli przycisk kamery ma się pokzywać i urządzenie posiada kamerę
+        if (isCamera && getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            Toast.makeText(getApplicationContext(), getString(R.string.toast_na_miejscu), Toast.LENGTH_SHORT).show();
             final ViewGroup.LayoutParams paramsKamera = btnCenter.getLayoutParams();
             paramsKamera.width = btnBottomWidth;
             btnCenter.setLayoutParams(paramsKamera);
             btnCenter.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // tworzy folder
-                    // wlacza kamere
+                    // pokazuje popup ze wskazówką
+                    curPopupMode = "prompt";
+                    showPopupInfo = true;
+                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnCenter, btnRight);
                 }
             });
             btnCenter.setVisibility(View.VISIBLE);
@@ -387,9 +393,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                curPopupMode = "info";
                 showPopupInfo = true;
                 if (inflater != null) {
-                    setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnRight);
+                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnCenter, btnRight);
                 }
             }
         });
@@ -405,6 +412,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             double lat = observationPoint.getLatitude();
             double lng = observationPoint.getLongitude();
             String comment = observationPoint.getComment();
+            boolean isHorizontal = observationPoint.isHorizontal();
             String name = null;
             String description = null;
             String monument_image = null;
@@ -423,7 +431,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     monument_image = null;
                 }
             }
-            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, null, null, id, RADIUS));
+            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, null, null, id, RADIUS, isHorizontal));
             mClusterManager.setOnClusterItemInfoWindowClickListener(
                     new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                         @Override
@@ -435,6 +443,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             double lng = ClusterItem.getPosition().longitude;
                             curLat = lat;
                             curLng = lng;
+                            curIsHorizontal = ClusterItem.isHorizontal();
                             Button btnLeft = findViewById(R.id.btn_info);
                             Button btnRight = findViewById(R.id.btn_trasa);
                             Button btnCenter = findViewById(R.id.btn_kamera);
@@ -447,7 +456,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     mOrigin.longitude, distance);
 
                             if (distance[0] < ClusterItem.getRadius()) {
-                                Toast.makeText(getApplicationContext(), getString(R.string.toast_na_miejscu), Toast.LENGTH_SHORT).show();
                                 isCamera = true;
                             } else if (distance[0] >= ClusterItem.getRadius()) {
                                 isCamera = false;
@@ -758,15 +766,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Tworzy popup z informacja o zabytku
      */
-    private void setPopupWindowContent(View view, int width, int height, String title, String image, String description, Button btnLeft, Button btnRight) {
+    private void setPopupWindowContent(String mode, View view, int width, int height, String title, String image, String description, Button btnLeft, Button btnCenter, Button btnRight) {
+        // przypisuje dane do zmiennych tymczasowych, jezeli pokazujemy popup z informacją
+        curName = title;
         curMonumentImage = image;
         curDescription = description;
-        curName = title;
         // Tworzy popup
         mPopupWindow = new PopupWindow(view, width, height);
         mPopupWindow.setElevation(5.0f);
         // Ustawia elementy popupa
         Button btnClose = null;
+        Button btnOk = null;
         TextView infoTitle = null;
         ImageView infoImage = null;
         TextView infoDescription = null;
@@ -776,20 +786,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             infoImage = view.findViewById(R.id.info_image);
             infoDescription = view.findViewById(R.id.info_text_description);
             btnClose = view.findViewById(R.id.close);
+            btnOk = view.findViewById(R.id.ok);
             imageLayout = view.findViewById(R.id.info_image_layout);
         }
-        if (btnClose != null && infoTitle != null && infoImage != null && infoDescription != null) {
+        if (btnClose != null && btnOk != null && infoTitle != null && infoImage != null && infoDescription != null) {
+            btnOk.setVisibility(View.GONE);
+            // Jezeli przekzujemy dane wskazowki
+            if (mode.equals("prompt")) {
+                // pobieramy dane wskazówki
+                title = getString(R.string.wskazowka_naglowek);
+                if (curIsHorizontal) {
+                    image = "horizontal";
+                    description = getString(R.string.wskazowka_tresc_poziomo);
+                } else {
+                    image = "vertical";
+                    description = getString(R.string.wskazowka_tresc_pionowo);
+                }
+                // ustawiamy odpowiednio obrazek
+                if (image.equals("vertical")) {
+                    infoImage.setImageResource(R.drawable.vertical);
+                } else {
+                    infoImage.setImageResource(R.drawable.horizontal);
+                }
+                // definiujemy przycisk Ok, włączający kamerę
+                ViewGroup.LayoutParams paramsOk = btnOk.getLayoutParams();
+                paramsOk.width = screenWidth / 4;
+                btnOk.setLayoutParams(paramsOk);
+                btnOk.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // tworzy folder
+                        // wlacza kamere
+                    }
+                });
+                btnOk.setVisibility(View.VISIBLE);
+            } else {
+                // ladujemy obrazek
+                new DownloadImageTask(infoImage).execute(image);
+            }
             // Wstawia nagłówek
             infoTitle.setText(title);
+            // Wstawia opis
+            infoDescription.setText(description);
             // Wstawia obrazek
             ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
             params.height = imageLayoutHeight;
             imageLayout.setLayoutParams(params);
-            if (image != null) {
-                new DownloadImageTask(infoImage).execute(image);
-            }
-            // Wstawia opis
-            infoDescription.setText(description);
             // Ustwienia przycisku na wyłączenie
             btnClose.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -799,8 +841,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     showPopupInfo = false;
                     Button btnLeft = findViewById(R.id.btn_info);
                     Button btnRight = findViewById(R.id.btn_trasa);
+                    Button btnCenter = findViewById(R.id.btn_kamera);
                     btnLeft.setEnabled(true);
                     btnRight.setEnabled(true);
+                    btnCenter.setEnabled(true);
                     btnMenu.setEnabled(true);
                     curName = null;
                     curMonumentImage = null;
@@ -812,6 +856,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
         btnLeft.setEnabled(false);
         btnRight.setEnabled(false);
+        btnCenter.setEnabled(false);
         btnMenu.setEnabled(false);
     }
 

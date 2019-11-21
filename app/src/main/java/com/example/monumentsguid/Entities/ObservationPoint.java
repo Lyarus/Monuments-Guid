@@ -10,21 +10,24 @@ public class ObservationPoint implements Parcelable {
     String comment;
     String image;
     String year;
+    public static final Creator<ObservationPoint> CREATOR = new Creator<ObservationPoint>() {
+        @Override
+        public ObservationPoint createFromParcel(Parcel source) {
+            return new ObservationPoint(source);
+        }
+
+        @Override
+        public ObservationPoint[] newArray(int size) {
+            return new ObservationPoint[size];
+        }
+    };
     String monumentRef;
 
     public ObservationPoint() {
 
     }
 
-    public ObservationPoint(String id, String comment, String image, double latitude, double longitude, String year, String monumentRef) {
-        this.id = id;
-        this.comment = comment;
-        this.image = image;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.year = year;
-        this.monumentRef = monumentRef;
-    }
+    boolean isHorizontal;
 
     public String getId() {
         return id;
@@ -74,25 +77,16 @@ public class ObservationPoint implements Parcelable {
         this.year = year;
     }
 
-    public String getMonumentRef() {
-        return monumentRef;
-    }
-
-    public void setMonumentRef(String monumentRef) {
+    public ObservationPoint(String id, String comment, String image, double latitude, double longitude, String year, boolean isHorizontal, String monumentRef) {
+        this.id = id;
+        this.comment = comment;
+        this.image = image;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.year = year;
+        this.isHorizontal = isHorizontal;
         this.monumentRef = monumentRef;
     }
-
-    public static final Parcelable.Creator<ObservationPoint> CREATOR = new Parcelable.Creator<ObservationPoint>() {
-        @Override
-        public ObservationPoint createFromParcel(Parcel source) {
-            return new ObservationPoint(source);
-        }
-
-        @Override
-        public ObservationPoint[] newArray(int size) {
-            return new ObservationPoint[size];
-        }
-    };
 
     protected ObservationPoint(Parcel in) {
         this.latitude = in.readDouble();
@@ -101,12 +95,29 @@ public class ObservationPoint implements Parcelable {
         this.comment = in.readString();
         this.image = in.readString();
         this.year = in.readString();
+        this.isHorizontal = in.readByte() != 0;
         this.monumentRef = in.readString();
+    }
+
+    public String getMonumentRef() {
+        return monumentRef;
+    }
+
+    public void setMonumentRef(String monumentRef) {
+        this.monumentRef = monumentRef;
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public boolean isHorizontal() {
+        return isHorizontal;
+    }
+
+    public void setHorizontal(boolean horizontal) {
+        isHorizontal = horizontal;
     }
 
     @Override
@@ -117,6 +128,7 @@ public class ObservationPoint implements Parcelable {
         dest.writeString(this.comment);
         dest.writeString(this.image);
         dest.writeString(this.year);
+        dest.writeByte(this.isHorizontal ? (byte) 1 : (byte) 0);
         dest.writeString(this.monumentRef);
     }
 }

@@ -13,12 +13,14 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
     private String year;
     private String id;
     private int radius;
+    private boolean isHorizontal;
 
-    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id, int radius) {
+    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id, int radius, boolean isHorizontal) {
         this.image = image;
         this.year = year;
         this.id = id;
         this.radius = radius;
+        this.isHorizontal = isHorizontal;
         location = new LatLng(lat, lng);
         this.name = name;
         this.comment = comment;
@@ -103,5 +105,13 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
 
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+
+    public boolean isHorizontal() {
+        return isHorizontal;
+    }
+
+    public void setHorizontal(boolean horizontal) {
+        isHorizontal = horizontal;
     }
 }
