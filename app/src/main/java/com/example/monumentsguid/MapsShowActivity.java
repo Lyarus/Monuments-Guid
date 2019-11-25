@@ -36,8 +36,10 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     private List<ObservationPoint> observationPoints;
     private List<Monument> monuments;
 
+    private GoogleMap mMap;
+
     private static final int DEFAULT_ZOOM = 13;
-    private final LatLng mDefaultLocation = new LatLng(51.098781, 17.036716);
+    private LatLng mDefaultLocation;
     // rozmiar ekranu urzadzenia
     int screenHeight;
     int screenWidth;
@@ -177,26 +179,28 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        googleMap.getUiSettings().setMapToolbarEnabled(false);
+    public void onMapReady(final GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.getUiSettings().setMapToolbarEnabled(false);
 
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
-        mClusterManager = new ClusterManager<>(this, googleMap);
-        mClusterManager.setRenderer(new MarkerClusterRenderer(this, googleMap, mClusterManager));
-        googleMap.setOnCameraIdleListener(mClusterManager);
-        googleMap.setOnMarkerClickListener(mClusterManager);
-        googleMap.setOnInfoWindowClickListener(mClusterManager);
+        mClusterManager = new ClusterManager<>(this, mMap);
+        mClusterManager.setRenderer(new MarkerClusterRenderer(this, mMap, mClusterManager));
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnInfoWindowClickListener(mClusterManager);
         addClusterItems();
         mClusterManager.cluster();
 
         if (location != null) {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
         } else {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+            mDefaultLocation = new LatLng(51.098781, 17.036716);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, 10));
         }
 
         // Reaguje na klikniecie na mape
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
                 Button btnLeft = findViewById(R.id.btn_info);
@@ -217,12 +221,13 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 view.getContext().startActivity(intent);
+                mMap.clear();
             }
         });
 
         // Buduje okno informacyjne
         CustomInfoWindowGoogleMap customInfoWindowGoogleMap = new CustomInfoWindowGoogleMap(getApplicationContext());
-        googleMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
+        mMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
     }
 
     /**
@@ -286,6 +291,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                 i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                 startActivity(i);
+                mMap.clear();
             }
         });
         btnRight.setVisibility(View.VISIBLE);

@@ -47,4 +47,9 @@
     <string name="wskazowka_naglowek">Wskazówka</string>
     <string name="wskazowka_tresc_poziomo">Dane zdjęcie należy wykonać, trzymając urządzenie poziomo.</string>
     <string name="wskazowka_tresc_pionowo">Dane zdjęcie należy wykonać, trzymając urządzenie pionowo.</string>
+    <string name="nasze_zdj_cie_budynka">Nasze zdjęcie budynka</string>
+    <string name="widok_z_kamery">Widok z kamery</string>
+    <string name="permission_text">Dana aplikacja potrzebuje dostępu do kamery.</string>
+    <string name="w_asne_zdj_cie">Własne zdjęcie</string>
 </resources>
+

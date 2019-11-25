@@ -61,7 +61,10 @@ import java.util.Objects;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
-    static final int REQUEST_PICTURE_CAPTURE = 1;
+    // Keys for storing activity state.
+    private static final String KEY_CAMERA_POSITION = "camera_position";
+    private static final String KEY_LOCATION = "location";
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 13;
     private static final int RADIUS = 20;
     private LatLng mDefaultLocation;
@@ -82,11 +85,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnMenu;
     private int btnMenuWidth;
     private int btnBottomWidth;
-    private int btnHeight;
     private int imageLayoutHeight;
     private PopupWindow mPopupWindow;
+    double latFromDetails;
     private boolean isCamera;
     private String curPopupMode;
+    double lngFromDetails;
     private double curLat;
     private double curLng;
     private boolean curIsHorizontal;
@@ -99,20 +103,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LayoutInflater inflater;
     private int popupWidth;
     private int popupHeight;
+    private boolean showPopupInfo;
+    private String curId;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
-
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
 
     // The geographical location where the device is currently located. That is, the last-known location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
-
-    // Keys for storing activity state.
-    private static final String KEY_CAMERA_POSITION = "camera_position";
-    private static final String KEY_LOCATION = "location";
-    private boolean showPopupInfo;
 
     // Clustery
     private ClusterManager<ClusterItem> mClusterManager;
@@ -123,20 +122,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         getLocationPermission();
 
-        double latFromDetails;
-        double lngFromDetails;
-
         Intent intent = getIntent();
         latFromDetails = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
         lngFromDetails = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
-
-        if (latFromDetails != 0.0 && lngFromDetails != 0.0) {
-            mDefaultLocation = new LatLng(latFromDetails, lngFromDetails);
-        } else {
-            mDefaultLocation = new LatLng(51.098781, 17.036716);
-        }
 
         // Get the application context
         mContext = getApplicationContext();
@@ -263,6 +253,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         updateLocationUI();
         mOrigin = getMyLocation();
+        if (mOrigin != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
+        } else if (latFromDetails != 0.0 && lngFromDetails != 0.0) {
+            mDefaultLocation = new LatLng(latFromDetails, lngFromDetails);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+        } else {
+            mDefaultLocation = new LatLng(51.098781, 17.036716);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, 10));
+        }
 
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
         mClusterManager = new ClusterManager<>(this, mMap);
@@ -272,12 +271,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnInfoWindowClickListener(mClusterManager);
         addClusterItems();
         mClusterManager.cluster();
-
-        if (mOrigin != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
-        } else {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-        }
 
         // Reaguje na klikniecie na mape
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -290,7 +283,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     btnRight.setVisibility(View.INVISIBLE);
                     Button btnCenter = findViewById(R.id.btn_kamera);
                     btnCenter.setVisibility(View.INVISIBLE);
-
                 } else {
                     Button btnRight = findViewById(R.id.btn_trasa);
                     btnRight.setText(R.string.pokaz);
@@ -320,6 +312,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 view.getContext().startActivity(intent);
+                mMap.clear();
             }
         });
 
@@ -328,6 +321,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setInfoWindowAdapter(customInfoWindowGoogleMap);
     }
 
+    /**
+     * Tworzy wszystkie dolne przyciski w zależności od akcji
+     **/
     private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final View customView, boolean isCamera) {
         final LatLng curPosition = new LatLng(lat, lng);
         // Jeżeli przycisk kamery ma się pokzywać i urządzenie posiada kamerę
@@ -439,6 +435,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             String name = ClusterItem.getName();
                             String monument_image = ClusterItem.getMonument_image();
                             String description = ClusterItem.getDescription();
+                            curId = ClusterItem.getId();
                             double lat = ClusterItem.getPosition().latitude;
                             double lng = ClusterItem.getPosition().longitude;
                             curLat = lat;
@@ -454,7 +451,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Location.distanceBetween(ClusterItem.getPosition().latitude,
                                     ClusterItem.getPosition().longitude, mOrigin.latitude,
                                     mOrigin.longitude, distance);
-
                             if (distance[0] < ClusterItem.getRadius()) {
                                 isCamera = true;
                             } else if (distance[0] >= ClusterItem.getRadius()) {
@@ -815,6 +811,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 btnOk.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        // przekierowuje na mape
+                        Intent i = new Intent(getApplicationContext(),
+                                CapturePictureActivity.class);
+                        i.putExtra("id", curId);
+                        startActivity(i);
+
                         // tworzy folder
                         // wlacza kamere
                     }

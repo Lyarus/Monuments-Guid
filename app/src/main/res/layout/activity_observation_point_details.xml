@@ -68,7 +68,7 @@
                     android:padding="10sp">
 
                     <ImageView
-                        android:id="@+id/observtionPointOldImage"
+                        android:id="@+id/observationPointOldImage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5sp"
@@ -96,11 +96,11 @@
                     android:padding="10sp">
 
                     <ImageView
-                        android:id="@+id/observtionPointNewImage"
+                        android:id="@+id/observationPointNewImage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10sp"
-                        android:contentDescription="@string/historyczne_zdj_cie_z_bazy_danych"
+                        android:contentDescription="@string/w_asne_zdj_cie"
                         android:src="@drawable/default_monument" />
 
                     <TextView
