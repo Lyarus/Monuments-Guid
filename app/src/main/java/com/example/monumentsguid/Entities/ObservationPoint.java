@@ -4,12 +4,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class ObservationPoint implements Parcelable {
-    public double latitude;
-    public double longitude;
-    String id;
-    String comment;
-    String image;
-    String year;
+    private double latitude;
+    private double longitude;
+    private String id;
+    private String comment;
+    private String image;
+    private String year;
+    private boolean isHorizontal;
+    private String monumentRef;
+    private String customImagePath;
+    private String customImageDate;
     public static final Creator<ObservationPoint> CREATOR = new Creator<ObservationPoint>() {
         @Override
         public ObservationPoint createFromParcel(Parcel source) {
@@ -21,13 +25,19 @@ public class ObservationPoint implements Parcelable {
             return new ObservationPoint[size];
         }
     };
-    String monumentRef;
 
-    public ObservationPoint() {
-
+    public ObservationPoint(String id, String comment, String image, double latitude, double longitude, String year, boolean isHorizontal, String monumentRef, String customImagePath, String customImageDate) {
+        this.id = id;
+        this.comment = comment;
+        this.image = image;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.year = year;
+        this.isHorizontal = isHorizontal;
+        this.monumentRef = monumentRef;
+        this.customImagePath = customImagePath;
+        this.customImageDate = customImageDate;
     }
-
-    boolean isHorizontal;
 
     public String getId() {
         return id;
@@ -77,14 +87,11 @@ public class ObservationPoint implements Parcelable {
         this.year = year;
     }
 
-    public ObservationPoint(String id, String comment, String image, double latitude, double longitude, String year, boolean isHorizontal, String monumentRef) {
-        this.id = id;
-        this.comment = comment;
-        this.image = image;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.year = year;
-        this.isHorizontal = isHorizontal;
+    public String getMonumentRef() {
+        return monumentRef;
+    }
+
+    public void setMonumentRef(String monumentRef) {
         this.monumentRef = monumentRef;
     }
 
@@ -97,19 +104,11 @@ public class ObservationPoint implements Parcelable {
         this.year = in.readString();
         this.isHorizontal = in.readByte() != 0;
         this.monumentRef = in.readString();
+        this.customImagePath = in.readString();
     }
 
-    public String getMonumentRef() {
-        return monumentRef;
-    }
-
-    public void setMonumentRef(String monumentRef) {
-        this.monumentRef = monumentRef;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getCustomImagePath() {
+        return customImagePath;
     }
 
     public boolean isHorizontal() {
@@ -118,6 +117,15 @@ public class ObservationPoint implements Parcelable {
 
     public void setHorizontal(boolean horizontal) {
         isHorizontal = horizontal;
+    }
+
+    public void setCustomImagePath(String customImagePath) {
+        this.customImagePath = customImagePath;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override
@@ -130,5 +138,14 @@ public class ObservationPoint implements Parcelable {
         dest.writeString(this.year);
         dest.writeByte(this.isHorizontal ? (byte) 1 : (byte) 0);
         dest.writeString(this.monumentRef);
+        dest.writeString(this.customImagePath);
+    }
+
+    public String getCustomImageDate() {
+        return customImageDate;
+    }
+
+    public void setCustomImageDate(String customImageDate) {
+        this.customImageDate = customImageDate;
     }
 }

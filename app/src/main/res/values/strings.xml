@@ -51,5 +51,6 @@
     <string name="widok_z_kamery">Widok z kamery</string>
     <string name="permission_text">Dana aplikacja potrzebuje dostępu do kamery.</string>
     <string name="w_asne_zdj_cie">Własne zdjęcie</string>
+    <string name="poczatek_data_nowe_zdjecie">Zdjęcie z dnia </string>
 </resources>
 

@@ -2,6 +2,7 @@ package com.example.monumentsguid;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.monumentsguid.Entities.City;
 import com.example.monumentsguid.Entities.Country;
+import com.example.monumentsguid.Entities.Image;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -22,7 +24,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,10 +34,11 @@ import static android.content.ContentValues.TAG;
 
 public class MainActivity extends AppCompatActivity {
 
-    public List<Country> countries = new ArrayList<>();
-    public List<City> cities = new ArrayList<>();
-    public List<Monument> monuments = new ArrayList<>();
-    public List<ObservationPoint> observationPoints = new ArrayList<>();
+    public List<Country> countries;
+    public List<City> cities;
+    public List<Monument> monuments;
+    public List<ObservationPoint> observationPoints;
+    private List<Image> imageList;
     // Połaczenie z BD
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -46,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
         cities = new ArrayList<>();
         monuments = new ArrayList<>();
         observationPoints = new ArrayList<>();
+        imageList = new ArrayList<>();
+
+        String storagePath = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.example.monumentsguid/files/Pictures/";
+        File file = new File(storagePath);
+        if (file.exists() && file.isDirectory()) {
+            walkdir(file);
+        }
 
         // Pobiera rozmiar ekranu urzadzenia
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
@@ -212,7 +224,14 @@ public class MainActivity extends AppCompatActivity {
                                 String year = document.getString("year");
                                 boolean isHorizontal = document.getBoolean("isHorizontal");
                                 String monumentRef = document.getString("monument_ref");
-                                ObservationPoint observationPoint = new ObservationPoint(id, comment, image, lat, lng, year, isHorizontal, monumentRef);
+                                Image customImage = getImage(id);
+                                String customImagePath = null;
+                                String customImageDate = null;
+                                if (customImage != null) {
+                                    customImagePath = customImage.getPath();
+                                    customImageDate = customImage.getDate().toString();
+                                }
+                                ObservationPoint observationPoint = new ObservationPoint(id, comment, image, lat, lng, year, isHorizontal, monumentRef, customImagePath, customImageDate);
                                 observationPoint.setId(id);
                                 observationPoint.setComment(comment);
                                 observationPoint.setImage(image);
@@ -220,12 +239,52 @@ public class MainActivity extends AppCompatActivity {
                                 observationPoint.setLongitude(lng);
                                 observationPoint.setYear(year);
                                 observationPoint.setMonumentRef(monumentRef);
+                                observationPoint.setCustomImagePath(customImagePath);
+                                observationPoint.setCustomImageDate(customImageDate);
                                 observationPoints.add(observationPoint);
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                         }
                     }
                 });
+    }
+
+    /**
+     * Metoda porównująca nazwę pliku z id, wyszukuje najnowszą wersję i zwraca
+     */
+    private Image getImage(String id) {
+        Image imageName = null;
+        Date tempDate = new Date(0L);
+        for (Image image : imageList) {
+            if (image != null) {
+                if (image.getPath().contains("_" + id + "_") && image.getDate().after(tempDate)
+                ) {
+                    tempDate = image.getDate();
+                    imageName = image;
+                }
+            }
+        }
+        return imageName;
+    }
+
+    /**
+     * Metoda zapisująca do listy wszystkie pliki podanej dyrektorii
+     */
+    public void walkdir(File dir) {
+        File[] listFile = dir.listFiles();
+        if (listFile != null) {
+            for (File file : listFile) {
+                if (file.isDirectory()) {// if its a directory need to get the files under that directory
+                    walkdir(file);
+                } else {
+                    String path = file.getPath();
+                    Date date = new Date(file.lastModified());
+                    Image image = new Image(path, date);
+                    imageList.add(image);
+                }
+            }
+
+        }
     }
 
 }

@@ -9,7 +9,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,28 +32,58 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int CAMERA_REQUEST_CODE = 1450;
     private static final int CAMERA_PERMISSION_CODE = 1460;
-    private ImageView ivCameraPreview;
+
+    // rozmiar ekranu urzadzenia
+    int screenHeight;
+    int screenWidth;
+    String textYear;
+    private TextView monumentName;
+    private TextView observationPointComment;
+    private ImageView observationPointOldImage;
+    private TextView observationPointOldYear;
+
     private String mCurrentPhotoPath;
     private String id;
+    private ImageView observationPointNewImage;
+    private TextView observationPointNewYear;
+    private Button btnPorownaj;
+    private String image;
+    private String year;
+    private String monument_name;
+    private String comment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_capture_picture);
+        setContentView(R.layout.activity_observation_point_details);
+
+        // Pobiera parametry ekranu urzadzenia
+        screenHeight = getResources().getDisplayMetrics().heightPixels;
+        screenWidth = getResources().getDisplayMetrics().widthPixels;
 
         Intent intent = getIntent();
         id = Objects.requireNonNull(intent.getExtras()).getString("id");
+        image = Objects.requireNonNull(intent.getExtras()).getString("image");
+        monument_name = Objects.requireNonNull(intent.getExtras()).getString("monument_name");
+        comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
+        String year = Objects.requireNonNull(intent.getExtras()).getString("year");
+        textYear = "Zdjęcie z lat " + year;
 
-        ivCameraPreview = findViewById(R.id.ivCameraPreview);
+        monumentName = findViewById(R.id.monumentName);
+        observationPointComment = findViewById(R.id.observationPointComment);
+        observationPointOldImage = findViewById(R.id.observationPointOldImage);
+        observationPointOldYear = findViewById(R.id.observationPointOldYear);
+        observationPointNewImage = findViewById(R.id.observationPointNewImage);
+        observationPointNewYear = findViewById(R.id.observationPointNewYear);
+        btnPorownaj = findViewById(R.id.porownaj);
+
         //check if app has permission to access the camera.
         if (EasyPermissions.hasPermissions(CapturePictureActivity.this, Manifest.permission.CAMERA)) {
             launchCamera();
-
         } else {
             //If permission is not present request for the same.
             EasyPermissions.requestPermissions(CapturePictureActivity.this, getString(R.string.permission_text), CAMERA_PERMISSION_CODE, Manifest.permission.CAMERA);
         }
-
     }
 
     /**
@@ -83,10 +116,28 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
         super.onActivityResult(requestCode, resultCode, data);
         //Preview the image captured by the camera
         if (requestCode == CAMERA_REQUEST_CODE) {
+            ViewGroup.LayoutParams paramsNewImage = observationPointNewImage.getLayoutParams();
+            paramsNewImage.height = screenHeight / 3;
+            observationPointNewImage.setLayoutParams(paramsNewImage);
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inSampleSize = 4;
             Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-            ivCameraPreview.setImageBitmap(bitmap);
+            observationPointNewImage.setImageBitmap(bitmap);
+
+            // wstawia tekst - data zdjecia
+            String text = getString(R.string.poczatek_data_nowe_zdjecie) + " " + new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
+            observationPointNewYear.setText(text);
+
+            ViewGroup.LayoutParams paramsOldImage = observationPointOldImage.getLayoutParams();
+            paramsOldImage.height = screenHeight / 3;
+            observationPointOldImage.setLayoutParams(paramsOldImage);
+            if (image != null) {
+                new MapsActivity.DownloadImageTask(observationPointOldImage).execute(image);
+            }
+
+            observationPointOldYear.setText(textYear);
+
+            monumentName.setText(monument_name);
+            observationPointComment.setText(comment);
         }
     }
 
@@ -107,8 +158,8 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
      */
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = id + "_" + timeStamp + "_";
+        String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "_" + id + "_" + timeStamp;
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
 
