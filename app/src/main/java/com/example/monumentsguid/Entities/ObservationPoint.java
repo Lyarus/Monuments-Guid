@@ -95,17 +95,6 @@ public class ObservationPoint implements Parcelable {
         this.monumentRef = monumentRef;
     }
 
-    protected ObservationPoint(Parcel in) {
-        this.latitude = in.readDouble();
-        this.longitude = in.readDouble();
-        this.id = in.readString();
-        this.comment = in.readString();
-        this.image = in.readString();
-        this.year = in.readString();
-        this.isHorizontal = in.readByte() != 0;
-        this.monumentRef = in.readString();
-        this.customImagePath = in.readString();
-    }
 
     public String getCustomImagePath() {
         return customImagePath;
@@ -123,9 +112,31 @@ public class ObservationPoint implements Parcelable {
         this.customImagePath = customImagePath;
     }
 
+    private ObservationPoint(Parcel in) {
+        this.latitude = in.readDouble();
+        this.longitude = in.readDouble();
+        this.id = in.readString();
+        this.comment = in.readString();
+        this.image = in.readString();
+        this.year = in.readString();
+        this.isHorizontal = in.readByte() != 0;
+        this.monumentRef = in.readString();
+        this.customImagePath = in.readString();
+        this.customImageDate = in.readString();
+    }
+
+    public String getCustomImageDate() {
+        return customImageDate;
+    }
+
+
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public void setCustomImageDate(String customImageDate) {
+        this.customImageDate = customImageDate;
     }
 
     @Override
@@ -139,13 +150,6 @@ public class ObservationPoint implements Parcelable {
         dest.writeByte(this.isHorizontal ? (byte) 1 : (byte) 0);
         dest.writeString(this.monumentRef);
         dest.writeString(this.customImagePath);
-    }
-
-    public String getCustomImageDate() {
-        return customImageDate;
-    }
-
-    public void setCustomImageDate(String customImageDate) {
-        this.customImageDate = customImageDate;
+        dest.writeString(this.customImageDate);
     }
 }

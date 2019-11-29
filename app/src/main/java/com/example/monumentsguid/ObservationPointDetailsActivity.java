@@ -4,13 +4,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -28,7 +26,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
     private ImageView observationPointOldImage;
     private TextView observationPointOldYear;
     private ImageView observationPointNewImage;
-    private TextView observationPointNewYear;
+    private TextView observationPointNewDate;
     private Button btnPorownaj;
 
     @Override
@@ -43,10 +41,10 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         String image = Objects.requireNonNull(intent.getExtras()).getString("image");
         String year = Objects.requireNonNull(intent.getExtras()).getString("year");
         String customImagePath = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
-        String textYear = "Zdjęcie z lat " + year;
-        if (customImagePath != null) {
-            Toast.makeText(getApplicationContext(), "customImagePath: " + customImagePath, Toast.LENGTH_SHORT).show();
-        }
+        String customImageDate = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
+
+        String oldImageYearText = "Zdjęcie z lat " + year;
+        String newImageDateText = "Zdjęcie z dnia " + customImageDate;
 
         // Pobiera parametry ekranu urzadzenia
         screenHeight = getResources().getDisplayMetrics().heightPixels;
@@ -58,7 +56,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         observationPointOldImage = findViewById(R.id.observationPointOldImage);
         observationPointOldYear = findViewById(R.id.observationPointOldYear);
         observationPointNewImage = findViewById(R.id.observationPointNewImage);
-        observationPointNewYear = findViewById(R.id.observationPointNewYear);
+        observationPointNewDate = findViewById(R.id.observationPointNewYear);
         btnPorownaj = findViewById(R.id.porownaj);
 
         // Konfiguruje elementy
@@ -73,20 +71,21 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             new MapsActivity.DownloadImageTask(observationPointOldImage).execute(image);
         }
 
-        observationPointOldYear.setText(textYear);
+        observationPointOldYear.setText(oldImageYearText);
 
         ViewGroup.LayoutParams paramsNewImage = observationPointNewImage.getLayoutParams();
         paramsNewImage.height = screenHeight / 3;
         observationPointNewImage.setLayoutParams(paramsNewImage);
         if (customImagePath != null) {
-            String storagePath = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.example.monumentsguid/files/Pictures/" + customImagePath;
-            File file = new File(storagePath);
+            File file = new File(customImagePath);
             if (file.exists()) {
                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-                Bitmap bitmap = BitmapFactory.decodeFile(storagePath, bmOptions);
+                Bitmap bitmap = BitmapFactory.decodeFile(customImagePath, bmOptions);
                 observationPointNewImage.setImageBitmap(bitmap);
             }
         }
+
+        observationPointNewDate.setText(newImageDateText);
 
         ViewGroup.LayoutParams paramsPorownaj = btnPorownaj.getLayoutParams();
         paramsPorownaj.width = screenWidth / 4;

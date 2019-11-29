@@ -101,6 +101,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String curMonumentImage;
     private String curDescription;
     private String curCustomImagePath;
+    private String curCustomImageDate;
     private Polyline mPolyline;
     private LatLng mOrigin;
     private LatLng mDestination;
@@ -236,8 +237,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Button btnCenter = findViewById(R.id.btn_kamera);
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
-                createBottomBtns(btnLeft, btnCenter, btnRight, curLat, curLng, curName, curMonumentImage, curDescription, curCustomImagePath, customView, isCamera);
-                setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, curName, curMonumentImage, curDescription, curCustomImagePath, btnLeft, btnCenter, btnRight);
+                createBottomBtns(btnLeft, btnCenter, btnRight, curLat, curLng, curName, curMonumentImage, curDescription, curCustomImagePath, curCustomImageDate, customView, isCamera);
+                setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, curName, curMonumentImage, curDescription, curCustomImagePath, curCustomImageDate, btnLeft, btnCenter, btnRight);
             }
         }
     }
@@ -328,7 +329,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Tworzy wszystkie dolne przyciski w zależności od akcji
      **/
-    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final String customImagePath, final View customView, boolean isCamera) {
+    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final String customImagePath, final String customImageDate, final View customView, boolean isCamera) {
         final LatLng curPosition = new LatLng(lat, lng);
         // Jeżeli przycisk kamery ma się pokzywać i urządzenie posiada kamerę
         if (isCamera && getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -342,7 +343,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // pokazuje popup ze wskazówką
                     curPopupMode = "prompt";
                     showPopupInfo = true;
-                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, btnLeft, btnCenter, btnRight);
+                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnCenter, btnRight);
                 }
             });
             btnCenter.setVisibility(View.VISIBLE);
@@ -396,7 +397,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 curPopupMode = "info";
                 showPopupInfo = true;
                 if (inflater != null) {
-                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, btnLeft, btnCenter, btnRight);
+                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnCenter, btnRight);
                 }
             }
         });
@@ -416,6 +417,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String comment = observationPoint.getComment();
             boolean isHorizontal = observationPoint.isHorizontal();
             String customImagePath = observationPoint.getCustomImagePath();
+            String customImageDate = observationPoint.getCustomImageDate();
             String name = null;
             String description = null;
             String monument_image = null;
@@ -434,7 +436,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     monument_image = null;
                 }
             }
-            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, image, year, id, RADIUS, isHorizontal, customImagePath));
+            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, image, year, id, RADIUS, isHorizontal, customImagePath, customImageDate));
             mClusterManager.setOnClusterItemInfoWindowClickListener(
                     new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                         @Override
@@ -450,6 +452,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             curYear = ClusterItem.getYear();
                             curIsHorizontal = ClusterItem.isHorizontal();
                             curCustomImagePath = ClusterItem.getCustomImagePath();
+                            curCustomImageDate = ClusterItem.getCustomImageDate();
                             Button btnLeft = findViewById(R.id.btn_info);
                             Button btnRight = findViewById(R.id.btn_trasa);
                             Button btnCenter = findViewById(R.id.btn_kamera);
@@ -468,7 +471,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             if (inflater != null) {
                                 customView = inflater.inflate(R.layout.popup_info, null);
                                 // przy naciśnięciu na pinezkę tworzymy nowe przyciski i popup
-                                createBottomBtns(btnLeft, btnCenter, btnRight, curLat, curLng, name, monument_image, description, curCustomImagePath, customView, isCamera);
+                                createBottomBtns(btnLeft, btnCenter, btnRight, curLat, curLng, name, monument_image, description, curCustomImagePath, curCustomImageDate, customView, isCamera);
                             }
                         }
                     });
@@ -771,7 +774,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Tworzy popup z informacja o zabytku
      */
-    private void setPopupWindowContent(String mode, View view, int width, int height, String title, String image, String description, final String customImagePath, Button btnLeft, Button btnCenter, Button btnRight) {
+    private void setPopupWindowContent(String mode, View view, int width, int height, String title, String image, String description, final String customImagePath, final String customImageDate, Button btnLeft, Button btnCenter, Button btnRight) {
         // przypisuje dane do zmiennych tymczasowych, jezeli pokazujemy popup z informacją
         curName = title;
         curMonumentImage = image;
@@ -827,7 +830,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         i.putExtra("year", curYear);
                         i.putExtra("monument_name", curName);
                         i.putExtra("comment", curComment);
-                        i.putExtra("customImagePath", curCustomImagePath);
+                        i.putExtra("customImagePath", customImagePath);
+                        i.putExtra("customImageDate", customImageDate);
                         startActivity(i);
                     }
                 });

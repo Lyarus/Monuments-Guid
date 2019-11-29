@@ -25,9 +25,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import static android.content.ContentValues.TAG;
@@ -229,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                                 String customImageDate = null;
                                 if (customImage != null) {
                                     customImagePath = customImage.getPath();
-                                    customImageDate = customImage.getDate().toString();
+                                    customImageDate = getSimpleDate(customImage.getDate());
                                 }
                                 ObservationPoint observationPoint = new ObservationPoint(id, comment, image, lat, lng, year, isHorizontal, monumentRef, customImagePath, customImageDate);
                                 observationPoint.setId(id);
@@ -247,6 +249,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    /**
+     * Metoda wyciągająca samą datę z obiektu typu Date w celu prezentacji w aplikacji
+     */
+    private String getSimpleDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy", Locale.getDefault());
+        return sdf.format(date);
     }
 
     /**

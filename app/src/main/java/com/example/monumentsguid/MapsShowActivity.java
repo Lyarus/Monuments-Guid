@@ -58,6 +58,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     private String curImage;
     private String curYear;
     private String curCustomImagePath;
+    private String curCustomImageDate;
     private String monument_image;
     private String description;
     private String name;
@@ -173,7 +174,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
 
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
-                createBottomBtns(btnLeft, btnCenter, btnRight, curId, curComment, curLat, curLng, name, monument_image, description, curImage, curYear, curCustomImagePath, customView);
+                createBottomBtns(btnLeft, btnCenter, btnRight, curId, curComment, curLat, curLng, name, monument_image, description, curImage, curYear, curCustomImagePath, curCustomImageDate, customView);
                 setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnRight, btnCenter);
             }
         }
@@ -244,7 +245,8 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             String year = observationPoint.getYear();
             boolean isHorizontal = observationPoint.isHorizontal();
             String customImagePath = observationPoint.getCustomImagePath();
-            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, image, year, id, 0, isHorizontal, customImagePath));
+            String customImageDate = observationPoint.getCustomImageDate();
+            mClusterManager.addItem(new ClusterItem(lat, lng, name, comment, monument_image, description, image, year, id, 0, isHorizontal, customImagePath, customImageDate));
             mClusterManager.setOnClusterItemInfoWindowClickListener(
                     new ClusterManager.OnClusterItemInfoWindowClickListener<ClusterItem>() {
                         @Override
@@ -259,6 +261,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                             String image = ClusterItem.getImage();
                             String year = ClusterItem.getYear();
                             String customImagePath = ClusterItem.getCustomImagePath();
+                            String customImageDate = ClusterItem.getCustomImageDate();
                             curId = id;
                             curComment = comment;
                             curLat = lat;
@@ -266,13 +269,14 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                             curImage = image;
                             curYear = year;
                             curCustomImagePath = customImagePath;
+                            curCustomImageDate = customImageDate;
                             Button btnLeft = findViewById(R.id.btn_info);
                             Button btnRight = findViewById(R.id.btn_trasa);
                             Button btnCenter = findViewById(R.id.btn_szczegoly);
                             View customView;
                             if (inflater != null) {
                                 customView = inflater.inflate(R.layout.popup_info, null);
-                                createBottomBtns(btnLeft, btnCenter, btnRight, id, comment, lat, lng, name, monument_image, description, image, year, customImagePath, customView);
+                                createBottomBtns(btnLeft, btnCenter, btnRight, id, comment, lat, lng, name, monument_image, description, image, year, customImagePath, customImageDate, customView);
                             }
                         }
                     });
@@ -280,7 +284,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
 
-    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final String id, final String comment, final double lat, final double lng, final String name, final String monument_image, final String description, final String image, final String year, final String customImagePath, final View customView) {
+    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final String id, final String comment, final double lat, final double lng, final String name, final String monument_image, final String description, final String image, final String year, final String customImagePath, final String customImageDate, final View customView) {
         // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
         final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
         paramsWybierz.width = btnBottomWidth;
@@ -300,25 +304,28 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         });
         btnRight.setVisibility(View.VISIBLE);
 
-        // Wstawia wartosc prycisku Szczegóły - pokazuje pzycisk
-        final ViewGroup.LayoutParams paramsSzczegoly = btnCenter.getLayoutParams();
-        paramsSzczegoly.width = btnBottomWidth;
-        btnCenter.setLayoutParams(paramsSzczegoly);
-        btnCenter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(),
-                        ObservationPointDetailsActivity.class);
-                i.putExtra("id", id);
-                i.putExtra("comment", comment);
-                i.putExtra("name", name);
-                i.putExtra("year", year);
-                i.putExtra("image", image);
-                i.putExtra("customImagePath", customImagePath);
-                startActivity(i);
-            }
-        });
-        btnCenter.setVisibility(View.VISIBLE);
+        // Wstawia wartosc prycisku Szczegóły - pokazuje pzycisk, jeżeli w pamięci jest własne zdjęcie
+        if (customImagePath != null && customImageDate != null) {
+            final ViewGroup.LayoutParams paramsSzczegoly = btnCenter.getLayoutParams();
+            paramsSzczegoly.width = btnBottomWidth;
+            btnCenter.setLayoutParams(paramsSzczegoly);
+            btnCenter.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(getApplicationContext(),
+                            ObservationPointDetailsActivity.class);
+                    i.putExtra("id", id);
+                    i.putExtra("comment", comment);
+                    i.putExtra("name", name);
+                    i.putExtra("year", year);
+                    i.putExtra("image", image);
+                    i.putExtra("customImagePath", customImagePath);
+                    i.putExtra("customImageDate", customImageDate);
+                    startActivity(i);
+                }
+            });
+            btnCenter.setVisibility(View.VISIBLE);
+        }
 
         // Wstawia wartosc prycisku Info - pokazuje pzycisk
         final ViewGroup.LayoutParams paramsInfo = btnLeft.getLayoutParams();

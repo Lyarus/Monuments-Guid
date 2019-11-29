@@ -15,8 +15,9 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
     private int radius;
     private boolean isHorizontal;
     private String customImagePath;
+    private String customImageDate;
 
-    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id, int radius, boolean isHorizontal, String customImagePath) {
+    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id, int radius, boolean isHorizontal, String customImagePath, String customImageDate) {
         this.image = image;
         this.year = year;
         this.id = id;
@@ -28,6 +29,7 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
         this.monument_image = monument_image;
         this.description = descrition;
         this.customImagePath = customImagePath;
+        this.customImageDate = customImageDate;
     }
 
     public String getId() {
@@ -123,5 +125,13 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
 
     public void setCustomImagePath(String customImagePath) {
         this.customImagePath = customImagePath;
+    }
+
+    public String getCustomImageDate() {
+        return customImageDate;
+    }
+
+    public void setCustomImageDate(String customImageDate) {
+        this.customImageDate = customImageDate;
     }
 }

@@ -53,12 +53,12 @@ public class MonumentActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
-
         // Pobiera rozmiar ekranu urzadzenia
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
 

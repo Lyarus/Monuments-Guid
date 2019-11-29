@@ -54,6 +54,7 @@ public class CityActivity extends AppCompatActivity {
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
 
+
         // Pobiera rozmiar ekranu urzadzenia
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
 
