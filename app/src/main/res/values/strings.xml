@@ -52,5 +52,8 @@
     <string name="permission_text">Dana aplikacja potrzebuje dostępu do kamery.</string>
     <string name="w_asne_zdj_cie">Własne zdjęcie</string>
     <string name="poczatek_data_nowe_zdjecie">Zdjęcie z dnia </string>
+    <string name="poczatek_data_stare_zdjecie">Zdjęcie z lat </string>
+    <string name="nowe_zdjecie">Nowe</string>
+
 </resources>
 

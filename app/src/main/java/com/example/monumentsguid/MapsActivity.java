@@ -333,24 +333,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Tworzy wszystkie dolne przyciski w zależności od akcji
      **/
-    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final String customImagePath, final String customImageDate, final View customView, boolean isCamera) {
+    private void createBottomBtns(final Button btnLeft, final Button btnMiddle, final Button btnRight, final double lat, final double lng, final String name, final String monument_image, final String description, final String customImagePath, final String customImageDate, final View customView, boolean isCamera) {
         final LatLng curPosition = new LatLng(lat, lng);
         // Jeżeli przycisk kamery ma się pokzywać i urządzenie posiada kamerę
         if (isCamera && getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             Toast.makeText(getApplicationContext(), getString(R.string.toast_na_miejscu), Toast.LENGTH_SHORT).show();
-            final ViewGroup.LayoutParams paramsKamera = btnCenter.getLayoutParams();
+            final ViewGroup.LayoutParams paramsKamera = btnMiddle.getLayoutParams();
             paramsKamera.width = btnBottomWidth;
-            btnCenter.setLayoutParams(paramsKamera);
-            btnCenter.setOnClickListener(new View.OnClickListener() {
+            btnMiddle.setLayoutParams(paramsKamera);
+            btnMiddle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // pokazuje popup ze wskazówką
-                    curPopupMode = "prompt";
-                    showPopupInfo = true;
-                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnCenter, btnRight);
+                    // jeżeli zdjęcie już jest
+                    if (customImagePath != null && customImageDate != null) {
+                        // wlacza Szczegóły
+                        Intent i = new Intent(getApplicationContext(), ObservationPointDetailsActivity.class);
+                        i.putExtra("id", curId);
+                        i.putExtra("name", name);
+                        i.putExtra("comment", curComment);
+                        i.putExtra("year", curYear);
+                        i.putExtra("image", curImage);
+                        i.putExtra("customImagePath", customImagePath);
+                        i.putExtra("customImageDate", customImageDate);
+                        i.putExtra("mode", "fromMapsActivity");
+                        startActivity(i);
+
+                        // jeżeli jeszcze nie ma
+                    } else {
+                        // pokazuje popup ze wskazówką
+                        curPopupMode = "prompt";
+                        showPopupInfo = true;
+                        setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnMiddle, btnRight);
+                    }
                 }
             });
-            btnCenter.setVisibility(View.VISIBLE);
+            btnMiddle.setVisibility(View.VISIBLE);
         }
         // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
         btnRight.setText(R.string.trasa);
@@ -382,7 +399,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         btnLeft.setVisibility(View.INVISIBLE);
                         btnRight.setVisibility(View.INVISIBLE);
                         btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button_darkblue));
-                        btnCenter.setVisibility(View.INVISIBLE);
+                        btnMiddle.setVisibility(View.INVISIBLE);
                     }
                 }
             }
@@ -401,7 +418,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 curPopupMode = "info";
                 showPopupInfo = true;
                 if (inflater != null) {
-                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnCenter, btnRight);
+                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnMiddle, btnRight);
                 }
             }
         });
@@ -673,6 +690,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public boolean onClusterClick(Cluster<ClusterItem> cluster) {
+        Button btnLeft = findViewById(R.id.btn_info);
+        btnLeft.setVisibility(View.INVISIBLE);
+        Button btnRight = findViewById(R.id.btn_trasa);
+        btnRight.setVisibility(View.INVISIBLE);
+        Button btnCenter = findViewById(R.id.btn_kamera);
+        btnCenter.setVisibility(View.INVISIBLE);
         // Create the builder to collect all essential cluster items for the bounds.
         LatLngBounds.Builder builder = LatLngBounds.builder();
         for (ClusterItem item : cluster.getItems()) {
@@ -849,12 +872,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // wlacza kamere
                         Intent i = new Intent(getApplicationContext(), CapturePictureActivity.class);
                         i.putExtra("id", curId);
+                        i.putExtra("name", curName);
+                        i.putExtra("comment", curComment);
                         i.putExtra("image", curImage);
                         i.putExtra("year", curYear);
-                        i.putExtra("monument_name", curName);
-                        i.putExtra("comment", curComment);
-                        i.putExtra("customImagePath", customImagePath);
-                        i.putExtra("customImageDate", customImageDate);
                         startActivity(i);
                     }
                 });

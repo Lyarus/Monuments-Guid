@@ -115,17 +115,56 @@
                         android:textStyle="italic" />
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/porownaj"
-                    style="@android:style/Widget.Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center_horizontal"
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
                     android:layout_marginTop="5pt"
-                    android:layout_marginBottom="15sp"
-                    android:background="@drawable/rounded_corners_button_darkblue"
-                    android:text="@string/por_wnaj"
-                    android:textColor="@color/colorTextLight" />
+                    android:layout_marginBottom="5sp">
+
+                    <Button
+                        android:id="@+id/btn_left"
+                        style="@android:style/Widget.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_gravity="start"
+                        android:layout_marginStart="10pt"
+                        android:layout_marginEnd="2.5pt"
+                        android:layout_marginBottom="5pt"
+                        android:background="@drawable/rounded_corners_button_darkblue"
+                        android:text="@string/info"
+                        android:textColor="@color/colorTextLight"
+                        android:visibility="invisible" />
+
+                    <Button
+                        android:id="@+id/btn_middle"
+                        style="@android:style/Widget.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginStart="5pt"
+                        android:layout_marginEnd="5pt"
+                        android:layout_marginBottom="5pt"
+                        android:background="@drawable/rounded_corners_button_darkblue"
+                        android:text="@string/zdjecie"
+                        android:textColor="@color/colorTextLight"
+                        android:visibility="invisible" />
+
+                    <Button
+                        android:id="@+id/btn_right"
+                        style="@android:style/Widget.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_gravity="end"
+                        android:layout_marginStart="2.5pt"
+                        android:layout_marginEnd="10pt"
+                        android:layout_marginBottom="5pt"
+                        android:background="@drawable/rounded_corners_button_darkblue"
+                        android:textColor="@color/colorTextLight"
+                        android:visibility="invisible" />
+                </RelativeLayout>
 
             </LinearLayout>
 

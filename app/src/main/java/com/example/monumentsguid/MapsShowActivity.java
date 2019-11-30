@@ -27,19 +27,21 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MapsShowActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsShowActivity extends FragmentActivity implements OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterItem> {
     private List<ObservationPoint> observationPoints;
     private List<Monument> monuments;
 
     private GoogleMap mMap;
 
-    private static final int DEFAULT_ZOOM = 8;
+    private static final int DEFAULT_ZOOM = 18;
     private LatLng mDefaultLocation;
     // rozmiar ekranu urzadzenia
     int screenHeight;
@@ -189,6 +191,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
         mClusterManager = new ClusterManager<>(this, mMap);
         mClusterManager.setRenderer(new MarkerClusterRenderer(this, mMap, mClusterManager));
+        mClusterManager.setOnClusterClickListener(this);
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
@@ -322,6 +325,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                     i.putExtra("image", image);
                     i.putExtra("customImagePath", customImagePath);
                     i.putExtra("customImageDate", customImageDate);
+                    i.putExtra("mode", "fromMapsShowActivity");
                     startActivity(i);
                 }
             });
@@ -400,5 +404,30 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         btnRight.setEnabled(false);
         btnCenter.setEnabled(false);
         btnMenu.setEnabled(false);
+    }
+
+    @Override
+    public boolean onClusterClick(Cluster<ClusterItem> cluster) {
+        Button btnLeft = findViewById(R.id.btn_info);
+        btnLeft.setVisibility(View.INVISIBLE);
+        Button btnRight = findViewById(R.id.btn_trasa);
+        btnRight.setVisibility(View.INVISIBLE);
+        Button btnCenter = findViewById(R.id.btn_kamera);
+        btnCenter.setVisibility(View.INVISIBLE);
+        // Create the builder to collect all essential cluster items for the bounds.
+        LatLngBounds.Builder builder = LatLngBounds.builder();
+        for (ClusterItem item : cluster.getItems()) {
+            builder.include(item.getPosition());
+        }
+        // Get the LatLngBounds
+        final LatLngBounds bounds = builder.build();
+
+        // Animate camera to the bounds
+        try {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 }

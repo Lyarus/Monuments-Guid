@@ -28,7 +28,9 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
     private TextView observationPointOldYear;
     private ImageView observationPointNewImage;
     private TextView observationPointNewDate;
-    private Button btnPorownaj;
+    private Button btnLeft;
+    private Button btnMiddle;
+    private Button btnRight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,15 +39,17 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
 
         // Pobiera dane z poprzedniego widoka
         Intent intent = getIntent();
-        String name = Objects.requireNonNull(intent.getExtras()).getString("name");
-        String comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
-        String image = Objects.requireNonNull(intent.getExtras()).getString("image");
-        String year = Objects.requireNonNull(intent.getExtras()).getString("year");
+        final String id = Objects.requireNonNull(intent.getExtras()).getString("id");
+        final String name = Objects.requireNonNull(intent.getExtras()).getString("name");
+        final String comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
+        final String image = Objects.requireNonNull(intent.getExtras()).getString("image");
+        final String year = Objects.requireNonNull(intent.getExtras()).getString("year");
         String customImagePath = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
         String customImageDate = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
+        String mode = Objects.requireNonNull(intent.getExtras()).getString("mode");
 
-        String oldImageYearText = "Zdjęcie z lat " + year;
-        String newImageDateText = "Zdjęcie z dnia " + customImageDate;
+        String oldImageYearText = getString(R.string.poczatek_data_stare_zdjecie) + " " + year;
+        String newImageDateText = getString(R.string.poczatek_data_nowe_zdjecie) + " " + customImageDate;
 
         // Pobiera parametry ekranu urzadzenia
         screenHeight = getResources().getDisplayMetrics().heightPixels;
@@ -58,7 +62,9 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         observationPointOldYear = findViewById(R.id.observationPointOldYear);
         observationPointNewImage = findViewById(R.id.observationPointNewImage);
         observationPointNewDate = findViewById(R.id.observationPointNewYear);
-        btnPorownaj = findViewById(R.id.porownaj);
+        btnLeft = findViewById(R.id.btn_left);
+        btnMiddle = findViewById(R.id.btn_middle);
+        btnRight = findViewById(R.id.btn_right);
 
         // Konfiguruje elementy
         monumentName.setText(Html.fromHtml(name));
@@ -88,16 +94,55 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
 
         observationPointNewDate.setText(newImageDateText);
 
-        ViewGroup.LayoutParams paramsPorownaj = btnPorownaj.getLayoutParams();
-        paramsPorownaj.width = screenWidth / 4;
-        btnPorownaj.setLayoutParams(paramsPorownaj);
-        btnPorownaj.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Intent intent = new Intent(view.getContext(), MainActivity.class);
-                //view.getContext().startActivity(intent);
-            }
-        });
 
+        if (mode != null && mode.equals("fromMapsShowActivity")) {
+            // Definiuje środkowy przycisk
+            ViewGroup.LayoutParams paramsBtnMiddle = btnMiddle.getLayoutParams();
+            paramsBtnMiddle.width = screenWidth / 4;
+            btnMiddle.setLayoutParams(paramsBtnMiddle);
+            btnMiddle.setText(R.string.por_wnaj);
+            btnMiddle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //Intent intent = new Intent(view.getContext(), MainActivity.class);
+                    //view.getContext().startActivity(intent);
+                }
+            });
+            btnMiddle.setVisibility(View.VISIBLE);
+        } else if (mode != null && mode.equals("fromMapsActivity")) {
+            // Definiuje lewy przycisk
+            ViewGroup.LayoutParams paramsBtnLeft = btnLeft.getLayoutParams();
+            paramsBtnLeft.width = screenWidth / 4;
+            btnLeft.setLayoutParams(paramsBtnLeft);
+            btnLeft.setText(R.string.nowe_zdjecie);
+            btnLeft.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(getApplicationContext(), CapturePictureActivity.class);
+                    i.putExtra("id", id);
+                    i.putExtra("name", name);
+                    i.putExtra("comment", comment);
+                    i.putExtra("image", image);
+                    i.putExtra("year", year);
+
+                    startActivity(i);
+                }
+            });
+            btnLeft.setVisibility(View.VISIBLE);
+
+            // Definiuje prawy przycisk
+            ViewGroup.LayoutParams paramsBtnRight = btnRight.getLayoutParams();
+            paramsBtnRight.width = screenWidth / 4;
+            btnRight.setLayoutParams(paramsBtnRight);
+            btnRight.setText(R.string.por_wnaj);
+            btnRight.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //Intent intent = new Intent(view.getContext(), MainActivity.class);
+                    //view.getContext().startActivity(intent);
+                }
+            });
+            btnRight.setVisibility(View.VISIBLE);
+        }
     }
 }
