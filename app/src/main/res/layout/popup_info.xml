@@ -60,6 +60,7 @@
 
             <LinearLayout
                 android:id="@+id/info_image_layout"
+                android:paddingTop="10sp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
@@ -70,7 +71,6 @@
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_marginStart="10sp"
-                    android:layout_marginTop="5sp"
                     android:layout_marginEnd="10sp"
                     android:layout_marginBottom="5sp"
                     android:contentDescription="@string/wsp_czesne_zdj_cie_zabytka"

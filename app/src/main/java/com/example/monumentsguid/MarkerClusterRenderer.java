@@ -42,4 +42,9 @@ public class MarkerClusterRenderer extends DefaultClusterRenderer<ClusterItem> {
         final Bitmap icon = mClusterIconGenerator.makeIcon(String.valueOf(cluster.getSize()));
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon));
     }
+
+    @Override
+    protected boolean shouldRenderAsCluster(Cluster<ClusterItem> cluster) {
+        return cluster.getSize() > 1;
+    }
 }

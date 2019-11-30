@@ -40,10 +40,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
 import org.json.JSONObject;
@@ -59,7 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterItem> {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     // Keys for storing activity state.
@@ -272,6 +274,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
         mClusterManager = new ClusterManager<>(this, mMap);
         mClusterManager.setRenderer(new MarkerClusterRenderer(this, mMap, mClusterManager));
+        mClusterManager.setOnClusterClickListener(this);
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
@@ -666,6 +669,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         return data;
+    }
+
+    @Override
+    public boolean onClusterClick(Cluster<ClusterItem> cluster) {
+        // Create the builder to collect all essential cluster items for the bounds.
+        LatLngBounds.Builder builder = LatLngBounds.builder();
+        for (ClusterItem item : cluster.getItems()) {
+            builder.include(item.getPosition());
+        }
+        // Get the LatLngBounds
+        final LatLngBounds bounds = builder.build();
+
+        // Animate camera to the bounds
+        try {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     /**

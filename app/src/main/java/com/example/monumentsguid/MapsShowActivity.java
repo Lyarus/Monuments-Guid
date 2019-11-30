@@ -39,7 +39,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
 
     private GoogleMap mMap;
 
-    private static final int DEFAULT_ZOOM = 13;
+    private static final int DEFAULT_ZOOM = 8;
     private LatLng mDefaultLocation;
     // rozmiar ekranu urzadzenia
     int screenHeight;
