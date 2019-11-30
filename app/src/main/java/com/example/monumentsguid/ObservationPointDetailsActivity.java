@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -60,7 +61,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         btnPorownaj = findViewById(R.id.porownaj);
 
         // Konfiguruje elementy
-        monumentName.setText(name);
+        monumentName.setText(Html.fromHtml(name));
 
         observationPointComment.setText(comment);
 

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
-    android:background="@drawable/rounded_corner_popup"
+    android:background="@drawable/rounded_corners_popup_blue"
     android:padding="2dp">
 
     <RelativeLayout
@@ -102,7 +102,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="5pt"
                 android:layout_marginBottom="10sp"
-                android:background="@drawable/rounded_corners_button"
+                android:background="@drawable/rounded_corners_button_darkblue"
                 android:text="@string/ok"
                 android:textColor="@color/colorTextLight"
                 android:visibility="gone" />

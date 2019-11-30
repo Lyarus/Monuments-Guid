@@ -27,8 +27,11 @@ public class CountryActivity extends AppCompatActivity {
     private List<Monument> monuments;
     private List<ObservationPoint> observationPoints;
 
-    private List<String> countryNames;
-    private List<String> countryImages;
+    private List<City> citiesFiltered;
+    private List<Monument> monumentsFiltered;
+    private List<ObservationPoint> observationPointsFiltered;
+
+    private List<GridItem> countryItems;
     private List<String> countryIds;
 
     private GridView gridView;
@@ -36,12 +39,39 @@ public class CountryActivity extends AppCompatActivity {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // filtruje miasta wybranego kraju
+            String countryId = countryIds.get(position);
+            for (City city : cities) {
+                String countryRef = city.getCountryRef();
+                if (countryRef.equals(countryId)) {
+                    citiesFiltered.add(city);
+                    String cityId = city.getId();
+                    // filtruje zabytki miast wybranego kraju
+                    for (Monument monument : monuments) {
+                        String cityRef = monument.getCityRef();
+                        if (cityRef.equals(cityId)) {
+                            monumentsFiltered.add(monument);
+                            String monumentId = monument.getId();
+                            // filtrue punkty obserwacji zabytków miast wybranego kraju
+                            for (ObservationPoint observationPoint : observationPoints) {
+                                String monumentRef = observationPoint.getMonumentRef();
+                                if (monumentRef.equals(monumentId)) {
+                                    observationPointsFiltered.add(observationPoint);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            // wysyła odfiltrowane dane do widoku miast
             Intent i = new Intent(getApplicationContext(),
                     CityActivity.class);
-            i.putExtra("id", countryIds.get(position));
-            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
-            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
-            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            i.putExtra("id", countryId);
+            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) citiesFiltered);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monumentsFiltered);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPointsFiltered);
             startActivity(i);
         }
     };
@@ -56,6 +86,12 @@ public class CountryActivity extends AppCompatActivity {
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
 
+        citiesFiltered = new ArrayList<>();
+        monumentsFiltered = new ArrayList<>();
+        observationPointsFiltered = new ArrayList<>();
+
+        countryItems = new ArrayList<>();
+
         // Pobiera rozmiar ekranu urzadzenia
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
 
@@ -66,19 +102,32 @@ public class CountryActivity extends AppCompatActivity {
         paramsTitle.width = screenWidth * 3 / 4;
         gridTitle.setLayoutParams(paramsTitle);
 
-        countryNames = new ArrayList<>();
-        countryImages = new ArrayList<>();
         countryIds = new ArrayList<>();
         addGridItems();
     }
 
     private void addGridItems() {
         for (Country country : countries) {
-            countryIds.add(country.getId());
-            countryNames.add(country.getName());
-            countryImages.add(country.getImage());
+            String id = country.getId();
+            String name = country.getName();
+            String image = country.getImage();
+            boolean isActive = false;
+            // jeżeli w pamięci urządzenia są obrazki z punktów obserwacji danego zabytku - ustawiamy isActive na true
+            if (observationPoints != null) {
+                for (ObservationPoint observationPoint : observationPoints) {
+                    String imagePath = observationPoint.getCustomImagePath();
+                    if (imagePath != null) {
+                        isActive = true;
+                        break;
+                    }
+                }
+            }
+            GridItem countryItem = new GridItem(id, name, image, isActive);
+            countryItems.add(countryItem);
+            countryIds.add(id);
         }
-        ItemGridAdapter countryAdapter = new ItemGridAdapter(CountryActivity.this, countryIds, countryNames, countryImages, true);
+
+        ItemGridAdapter countryAdapter = new ItemGridAdapter(CountryActivity.this, true, countryItems);
         gridView.setAdapter(countryAdapter);
         gridView.setOnItemClickListener(gridViewOnItemClickListener);
     }

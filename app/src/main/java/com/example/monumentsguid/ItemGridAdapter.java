@@ -16,25 +16,22 @@ public class ItemGridAdapter extends BaseAdapter {
 
     private Context context;
 
-    private List<String> nameList;
-    private List<String> imageList;
-    private List<String> idList;
-    private Boolean isDefaultImage;
+    private boolean isDefaultImage;
 
-    ItemGridAdapter(Context c, List<String> idList, List<String> nameList, List<String> imageList, Boolean isDefaultImage) {
+    private List<GridItem> gridItems;
+
+    ItemGridAdapter(Context c, boolean isDefaultImage, List<GridItem> gridItems) {
         this.context = c;
-        this.nameList = nameList;
-        this.imageList = imageList;
-        this.idList = idList;
         this.isDefaultImage = isDefaultImage;
+        this.gridItems = gridItems;
     }
 
     public int getCount() {
-        return idList.size();
+        return gridItems.size();
     }
 
-    public String getItem(int position) {
-        return idList.get(position);
+    public GridItem getItem(int position) {
+        return gridItems.get(position);
     }
 
     public long getItemId(int position) {
@@ -53,6 +50,7 @@ public class ItemGridAdapter extends BaseAdapter {
                 gridView = inflater.inflate(R.layout.grid_item_layout, null);
             }
             gridView.setLayoutParams(new GridView.LayoutParams(300, 300));
+
             gridView.setPadding(8, 8, 8, 8);
 
             name = gridView.findViewById(R.id.grid_item_name);
@@ -62,14 +60,20 @@ public class ItemGridAdapter extends BaseAdapter {
             gridView = convertView;
         }
         if (name != null) {
-            name.setText(Html.fromHtml(nameList.get(position)));
+            name.setText(Html.fromHtml(gridItems.get(position).getName()));
         }
         if (image != null && !isDefaultImage) {
             image.setImageResource(0);
         }
-        if (image != null && imageList.size() != 0 && imageList.get(position) != null) {
-            new MapsActivity.DownloadImageTask(image).execute(imageList.get(position));
+        if (image != null && isDefaultImage && gridItems.get(position).getImage() != null) {
+            new MapsActivity.DownloadImageTask(image).execute(gridItems.get(position).getImage());
+        }
+        if (gridItems.get(position).isActive()) {
+            gridView.setBackgroundResource(R.drawable.rounded_corners_popup_blue);
+        } else {
+            gridView.setBackgroundResource(R.drawable.rounded_corners_popup_grey);
         }
         return gridView;
     }
+
 }

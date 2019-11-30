@@ -15,7 +15,7 @@
 
     <Button
         android:id="@+id/btn_menu"
-        android:background="@drawable/rounded_corners_button"
+        android:background="@drawable/rounded_corners_button_darkblue"
         style="@android:style/Widget.Button"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
@@ -38,7 +38,7 @@
             android:layout_marginStart="10pt"
             android:layout_marginEnd="2.5pt"
             android:layout_marginBottom="5pt"
-            android:background="@drawable/rounded_corners_button"
+            android:background="@drawable/rounded_corners_button_darkblue"
             android:layout_alignParentStart="true"
             android:textColor="@color/colorTextLight"
             android:text="@string/info"
@@ -53,7 +53,7 @@
             android:layout_marginStart="5pt"
             android:layout_marginEnd="5pt"
             android:layout_marginBottom="5pt"
-            android:background="@drawable/rounded_corners_button"
+            android:background="@drawable/rounded_corners_button_darkblue"
             android:text="@string/szczeg_y"
             android:textColor="@color/colorTextLight"
             android:visibility="invisible" />
@@ -68,7 +68,7 @@
             android:layout_marginStart="2.5pt"
             android:layout_marginEnd="10pt"
             android:layout_marginBottom="5pt"
-            android:background="@drawable/rounded_corners_button"
+            android:background="@drawable/rounded_corners_button_darkblue"
             android:textColor="@color/colorTextLight"
             android:text="@string/wybierz"
             android:visibility="invisible" />

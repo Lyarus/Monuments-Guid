@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -294,7 +295,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ViewGroup.LayoutParams paramsTrasa = btnRight.getLayoutParams();
                     paramsTrasa.width = btnBottomWidth;
                     btnRight.setLayoutParams(paramsTrasa);
-                    btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
+                    btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button_darkblue));
                     btnRight.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -354,7 +355,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         paramsWybierz.width = btnBottomWidth;
         btnRight.setLayoutParams(paramsWybierz);
         if (mDestination == null || !mDestination.equals(curPosition)) {
-            btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
+            btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button_darkblue));
         } else {
             btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button_grey));
         }
@@ -377,7 +378,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         mDestination = null;
                         btnLeft.setVisibility(View.INVISIBLE);
                         btnRight.setVisibility(View.INVISIBLE);
-                        btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button));
+                        btnRight.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded_corners_button_darkblue));
                         btnCenter.setVisibility(View.INVISIBLE);
                     }
                 }
@@ -841,7 +842,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new DownloadImageTask(infoImage).execute(image);
             }
             // Wstawia nagłówek
-            infoTitle.setText(title);
+            infoTitle.setText(Html.fromHtml(title));
             // Wstawia opis
             infoDescription.setText(description);
             // Wstawia obrazek

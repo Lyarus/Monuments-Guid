@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.Html;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -366,7 +367,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         }
         if (btnClose != null && infoTitle != null && infoImage != null && infoDescription != null) {
             // Wstawia nagłówek
-            infoTitle.setText(title);
+            infoTitle.setText(Html.fromHtml(title));
             // Wstawia obrazek
             ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
             params.height = imageLayoutHeight;

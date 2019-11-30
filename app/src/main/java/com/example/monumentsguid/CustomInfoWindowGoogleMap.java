@@ -1,6 +1,7 @@
 package com.example.monumentsguid;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -30,7 +31,7 @@ public class CustomInfoWindowGoogleMap implements GoogleMap.InfoWindowAdapter {
             infoWindow = inflater.inflate(R.layout.custom_info_contents, null);
             TextView title = infoWindow.findViewById(R.id.title);
             TextView comment = infoWindow.findViewById(R.id.comment);
-            title.setText(marker.getTitle());
+            title.setText(Html.fromHtml(marker.getTitle()));
             comment.setText(marker.getSnippet());
         }
         return infoWindow;
