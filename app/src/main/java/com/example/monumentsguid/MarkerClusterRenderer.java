@@ -14,6 +14,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.google.maps.android.ui.IconGenerator;
 
 public class MarkerClusterRenderer extends DefaultClusterRenderer<ClusterItem> {
+    private static final int SHOULD_RENDER_AS_CLUSTER_NUMBER = 3;
 
     private final Context mContext;
     private final IconGenerator mClusterIconGenerator;
@@ -45,6 +46,6 @@ public class MarkerClusterRenderer extends DefaultClusterRenderer<ClusterItem> {
 
     @Override
     protected boolean shouldRenderAsCluster(Cluster<ClusterItem> cluster) {
-        return cluster.getSize() > 1;
+        return cluster.getSize() > SHOULD_RENDER_AS_CLUSTER_NUMBER;
     }
 }

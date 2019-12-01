@@ -20,6 +20,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.example.monumentsguid.Entities.City;
+import com.example.monumentsguid.Entities.Country;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,12 +38,26 @@ import java.util.List;
 import java.util.Objects;
 
 public class MapsShowActivity extends FragmentActivity implements OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterItem> {
+    private static final int DEFAULT_ZOOM = 17;
+    private List<ObservationPoint> observationPointsFiltered;
     private List<ObservationPoint> observationPoints;
+    private List<ObservationPoint> observationPointsFilteredCity;
+    private List<Country> countries;
     private List<Monument> monuments;
+    private List<City> cities;
+    private String city_ref;
+    private String monument_ref;
+    private String country_ref;
+    private double lat;
+    private double lng;
+    private String curCustomImagePath;
+    private String curCustomImageDate;
+    private String monument_image;
+    private String description;
+    private String name;
 
     private GoogleMap mMap;
-
-    private static final int DEFAULT_ZOOM = 18;
+    private LatLng location;
     private LatLng mDefaultLocation;
     // rozmiar ekranu urzadzenia
     int screenHeight;
@@ -60,12 +76,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     private double curLng;
     private String curImage;
     private String curYear;
-    private String curCustomImagePath;
-    private String curCustomImageDate;
-    private String monument_image;
-    private String description;
-    private String name;
-    private LatLng location;
     private boolean showPopupInfo;
     private LayoutInflater inflater;
     private int popupWidth;
@@ -79,16 +89,23 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         setContentView(R.layout.activity_maps_show);
 
         Intent intent = getIntent();
-        observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
-        monuments = getIntent().getParcelableArrayListExtra("monuments");
+        monument_ref = Objects.requireNonNull(intent.getExtras()).getString("monument_id");
+        country_ref = Objects.requireNonNull(intent.getExtras()).getString("country_ref");
+        city_ref = Objects.requireNonNull(intent.getExtras()).getString("city_ref");
+        name = Objects.requireNonNull(intent.getExtras()).getString("name");
+        lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
+        lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
+        description = Objects.requireNonNull(intent.getExtras()).getString("description");
         monument_image = Objects.requireNonNull(intent.getExtras()).getString("image");
         if (monument_image != null && monument_image.equals("")) {
             monument_image = null;
         }
-        double lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
-        double lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
-        name = Objects.requireNonNull(intent.getExtras()).getString("name");
-        description = Objects.requireNonNull(intent.getExtras()).getString("description");
+        countries = getIntent().getParcelableArrayListExtra("countries");
+        cities = getIntent().getParcelableArrayListExtra("cities");
+        monuments = getIntent().getParcelableArrayListExtra("monuments");
+        observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
+        observationPointsFiltered = getIntent().getParcelableArrayListExtra("observationPointsFiltered");
+        observationPointsFilteredCity = new ArrayList<>();
 
         location = new LatLng(lat, lng);
 
@@ -127,6 +144,45 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (showPopupInfo) {
+            mPopupWindow.dismiss();
+            showPopupInfo = false;
+            Button btnLeft = findViewById(R.id.btn_info);
+            Button btnRight = findViewById(R.id.btn_trasa);
+            Button btnMiddle = findViewById(R.id.btn_szczegoly);
+            btnLeft.setEnabled(true);
+            btnRight.setEnabled(true);
+            btnMiddle.setEnabled(true);
+            btnMenu.setEnabled(true);
+        } else {
+            for (Monument monument : monuments) {
+                if (monument.getCityRef().equals(city_ref)) {
+                    String monument_id = monument.getId();
+                    for (ObservationPoint observationPoint : observationPoints) {
+                        if (observationPoint.getMonumentRef().equals(monument_id)) {
+                            observationPointsFilteredCity.add(observationPoint);
+                        }
+                    }
+                }
+            }
+
+            super.onBackPressed();
+            Intent i = new Intent(getApplicationContext(),
+                    MonumentActivity.class);
+            i.putExtra("city_id", city_ref);
+            i.putExtra("country_ref", country_ref);
+            i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCity);
+            startActivity(i);
+            this.finish();
         }
     }
 
@@ -240,7 +296,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
      * Dodaje markery zabytkow na mape (pobiera z bazy)
      */
     private void addClusterItems() {
-        for (final ObservationPoint observationPoint : observationPoints) {
+        for (final ObservationPoint observationPoint : observationPointsFiltered) {
             String id = observationPoint.getId();
             double lat = observationPoint.getLatitude();
             double lng = observationPoint.getLongitude();
@@ -300,7 +356,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                         MapsActivity.class);
                 i.putExtra("lat", lat);
                 i.putExtra("lng", lng);
-                i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFiltered);
                 i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                 startActivity(i);
                 mMap.clear();
@@ -319,12 +375,23 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                     Intent i = new Intent(getApplicationContext(),
                             ObservationPointDetailsActivity.class);
                     i.putExtra("id", id);
+                    i.putExtra("country_ref", country_ref);
+                    i.putExtra("city_ref", city_ref);
+                    i.putExtra("monument_ref", monument_ref);
                     i.putExtra("comment", comment);
                     i.putExtra("name", name);
+                    i.putExtra("description", description);
+                    i.putExtra("lat", lat);
+                    i.putExtra("lng", lng);
                     i.putExtra("year", year);
                     i.putExtra("image", image);
                     i.putExtra("customImagePath", customImagePath);
                     i.putExtra("customImageDate", customImageDate);
+                    i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                    i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+                    i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                    i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                    i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFiltered);
                     i.putExtra("mode", "fromMapsShowActivity");
                     startActivity(i);
                 }
@@ -412,8 +479,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         btnLeft.setVisibility(View.INVISIBLE);
         Button btnRight = findViewById(R.id.btn_trasa);
         btnRight.setVisibility(View.INVISIBLE);
-        Button btnCenter = findViewById(R.id.btn_kamera);
-        btnCenter.setVisibility(View.INVISIBLE);
         // Create the builder to collect all essential cluster items for the bounds.
         LatLngBounds.Builder builder = LatLngBounds.builder();
         for (ClusterItem item : cluster.getItems()) {

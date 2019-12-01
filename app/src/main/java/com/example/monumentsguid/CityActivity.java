@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.monumentsguid.Entities.City;
+import com.example.monumentsguid.Entities.Country;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 
@@ -21,13 +22,13 @@ import java.util.Objects;
 
 
 public class CityActivity extends AppCompatActivity {
-
     private List<City> cities;
     private List<Monument> monuments;
     private List<ObservationPoint> observationPoints;
-
+    private List<Country> countries;
     private List<Monument> monumentsFiltered;
     private List<ObservationPoint> observationPointsFiltered;
+    private List<ObservationPoint> observationPointsFilteredCity;
     private List<GridItem> cityItems;
 
     private List<String> cityIds;
@@ -46,10 +47,10 @@ public class CityActivity extends AppCompatActivity {
                     monumentsFiltered.add(monument);
                     String monumentId = monument.getId();
                     // filtrue punkty obserwacji zabytków wybranego miasta
-                    for (ObservationPoint observationPoint : observationPoints) {
+                    for (ObservationPoint observationPoint : observationPointsFiltered) {
                         String monumentRef = observationPoint.getMonumentRef();
                         if (monumentRef.equals(monumentId)) {
-                            observationPointsFiltered.add(observationPoint);
+                            observationPointsFilteredCity.add(observationPoint);
                         }
                     }
                 }
@@ -59,10 +60,13 @@ public class CityActivity extends AppCompatActivity {
             // wysyła odfiltrowane dane do sidoku miast
             Intent i = new Intent(getApplicationContext(),
                     MonumentActivity.class);
-            i.putExtra("id", cityId);
-            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monumentsFiltered);
-            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPointsFiltered);
-
+            i.putExtra("city_id", cityId);
+            i.putExtra("country_ref", country_ref);
+            i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCity);
             startActivity(i);
         }
     };
@@ -72,12 +76,16 @@ public class CityActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
+        Intent intent = getIntent();
+        country_ref = Objects.requireNonNull(intent.getExtras()).getString("country_id");
+        countries = getIntent().getParcelableArrayListExtra("countries");
         cities = getIntent().getParcelableArrayListExtra("cities");
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
+        observationPointsFiltered = getIntent().getParcelableArrayListExtra("observationPointsFiltered");
 
         monumentsFiltered = new ArrayList<>();
-        observationPointsFiltered = new ArrayList<>();
+        observationPointsFilteredCity = new ArrayList<>();
         cityItems = new ArrayList<>();
 
         // Pobiera rozmiar ekranu urzadzenia
@@ -90,10 +98,18 @@ public class CityActivity extends AppCompatActivity {
         paramsTitle.width = screenWidth * 3 / 4;
         gridTitle.setLayoutParams(paramsTitle);
 
-        Intent intent = getIntent();
-        country_ref = Objects.requireNonNull(intent.getExtras()).getString("id");
         cityIds = new ArrayList<>();
         addGridItems();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, CountryActivity.class);
+        intent.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+        intent.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+        intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+        intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+        startActivity(intent);
     }
 
     private void addGridItems() {
@@ -105,8 +121,8 @@ public class CityActivity extends AppCompatActivity {
                 String image = city.getImage();
                 boolean isActive = false;
                 // jeżeli w pamięci urządzenia są obrazki z punktów obserwacji danego zabytku - ustawiamy isActive na true
-                if (observationPoints != null) {
-                    for (ObservationPoint observationPoint : observationPoints) {
+                if (observationPointsFiltered != null) {
+                    for (ObservationPoint observationPoint : observationPointsFiltered) {
                         String imagePath = observationPoint.getCustomImagePath();
                         if (imagePath != null) {
                             isActive = true;

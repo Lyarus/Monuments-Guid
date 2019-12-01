@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,14 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.monumentsguid.Entities.City;
+import com.example.monumentsguid.Entities.Country;
+import com.example.monumentsguid.Entities.Monument;
+import com.example.monumentsguid.Entities.ObservationPoint;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ObservationPointDetailsActivity extends AppCompatActivity {
@@ -22,15 +30,26 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
     int screenHeight;
     int screenWidth;
 
-    private TextView monumentName;
-    private TextView observationPointComment;
-    private ImageView observationPointOldImage;
-    private TextView observationPointOldYear;
-    private ImageView observationPointNewImage;
-    private TextView observationPointNewDate;
-    private Button btnLeft;
-    private Button btnMiddle;
-    private Button btnRight;
+    private String id;
+    private String country_ref;
+    private String city_ref;
+    private String monument_ref;
+    private double lat;
+    private double lng;
+    private String mode;
+    private String image;
+    private String year;
+    private String name;
+    private String comment;
+    private String description;
+    private String customImagePath;
+    private String customImageDate;
+    private List<Country> countries;
+    private List<City> cities;
+    private List<Monument> monuments;
+    private List<ObservationPoint> observationPoints;
+    private List<ObservationPoint> observationPointsFilteredMonument;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +58,28 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
 
         // Pobiera dane z poprzedniego widoka
         Intent intent = getIntent();
-        final String id = Objects.requireNonNull(intent.getExtras()).getString("id");
-        final String name = Objects.requireNonNull(intent.getExtras()).getString("name");
-        final String comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
-        final String image = Objects.requireNonNull(intent.getExtras()).getString("image");
-        final String year = Objects.requireNonNull(intent.getExtras()).getString("year");
-        String customImagePath = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
-        String customImageDate = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
-        String mode = Objects.requireNonNull(intent.getExtras()).getString("mode");
+        id = Objects.requireNonNull(intent.getExtras()).getString("id");
+        lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
+        lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
+        name = Objects.requireNonNull(intent.getExtras()).getString("name");
+        comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
+        description = Objects.requireNonNull(intent.getExtras()).getString("description");
+        image = Objects.requireNonNull(intent.getExtras()).getString("image");
+        year = Objects.requireNonNull(intent.getExtras()).getString("year");
+        customImagePath = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
+        customImageDate = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
+        mode = Objects.requireNonNull(intent.getExtras()).getString("mode");
+        monuments = getIntent().getParcelableArrayListExtra("monuments");
+        observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
+        if (mode != null && mode.equals("fromMapsShowActivity")) {
+            countries = getIntent().getParcelableArrayListExtra("countries");
+            cities = getIntent().getParcelableArrayListExtra("cities");
+            country_ref = Objects.requireNonNull(intent.getExtras()).getString("country_ref");
+            city_ref = Objects.requireNonNull(intent.getExtras()).getString("city_ref");
+            monument_ref = Objects.requireNonNull(intent.getExtras()).getString("monument_ref");
+        }
+
+        observationPointsFilteredMonument = new ArrayList<>();
 
         String oldImageYearText = getString(R.string.poczatek_data_stare_zdjecie) + " " + year;
         String newImageDateText = getString(R.string.poczatek_data_nowe_zdjecie) + " " + customImageDate;
@@ -56,15 +89,15 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         screenWidth = getResources().getDisplayMetrics().widthPixels;
 
         // Definiuje kontrolki
-        monumentName = findViewById(R.id.monumentName);
-        observationPointComment = findViewById(R.id.observationPointComment);
-        observationPointOldImage = findViewById(R.id.observationPointOldImage);
-        observationPointOldYear = findViewById(R.id.observationPointOldYear);
-        observationPointNewImage = findViewById(R.id.observationPointNewImage);
-        observationPointNewDate = findViewById(R.id.observationPointNewYear);
-        btnLeft = findViewById(R.id.btn_left);
-        btnMiddle = findViewById(R.id.btn_middle);
-        btnRight = findViewById(R.id.btn_right);
+        TextView monumentName = findViewById(R.id.monumentName);
+        TextView observationPointComment = findViewById(R.id.observationPointComment);
+        ImageView observationPointOldImage = findViewById(R.id.observationPointOldImage);
+        TextView observationPointOldYear = findViewById(R.id.observationPointOldYear);
+        ImageView observationPointNewImage = findViewById(R.id.observationPointNewImage);
+        TextView observationPointNewDate = findViewById(R.id.observationPointNewYear);
+        Button btnLeft = findViewById(R.id.btn_left);
+        Button btnMiddle = findViewById(R.id.btn_middle);
+        Button btnRight = findViewById(R.id.btn_right);
 
         // Konfiguruje elementy
         monumentName.setText(Html.fromHtml(name));
@@ -94,7 +127,6 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
 
         observationPointNewDate.setText(newImageDateText);
 
-
         if (mode != null && mode.equals("fromMapsShowActivity")) {
             // Definiuje środkowy przycisk
             ViewGroup.LayoutParams paramsBtnMiddle = btnMiddle.getLayoutParams();
@@ -120,11 +152,18 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     Intent i = new Intent(getApplicationContext(), CapturePictureActivity.class);
                     i.putExtra("id", id);
+                    i.putExtra("lat", lat);
+                    i.putExtra("lng", lng);
                     i.putExtra("name", name);
                     i.putExtra("comment", comment);
+                    i.putExtra("description", description);
                     i.putExtra("image", image);
                     i.putExtra("year", year);
-
+                    i.putExtra("customImagePath", customImagePath);
+                    i.putExtra("customImageDate", customImageDate);
+                    i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                    i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                    i.putExtra("image_exists", true);
                     startActivity(i);
                 }
             });
@@ -144,5 +183,49 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             });
             btnRight.setVisibility(View.VISIBLE);
         }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        for (ObservationPoint observationPoint : observationPoints) {
+            if (observationPoint.getMonumentRef().equals(monument_ref)) {
+                observationPointsFilteredMonument.add(observationPoint);
+            }
+        }
+        super.onBackPressed();
+        if (mode.equals("fromMapsShowActivity")) {
+            Intent i = new Intent(getApplicationContext(), MapsShowActivity.class);
+            i.putExtra("monument_id", monument_ref);
+            i.putExtra("country_ref", country_ref);
+            i.putExtra("city_ref", city_ref);
+            i.putExtra("name", name);
+            i.putExtra("lat", lat);
+            i.putExtra("lng", lng);
+            i.putExtra("description", description);
+            i.putExtra("image", image);
+            i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredMonument);
+            startActivity(i);
+            this.finish();
+        } else if (mode.equals("fromMapsActivity")) {
+            for (ObservationPoint observationPoint : observationPoints) {
+                if (observationPoint.getId().equals(id)) {
+                    observationPoint.setCustomImagePath(customImagePath);
+                    observationPoint.setCustomImageDate(customImageDate);
+                }
+            }
+            Intent i = new Intent(this, MapsActivity.class);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            i.putExtra("lat", lat);
+            i.putExtra("lng", lng);
+            startActivity(i);
+            this.finish();
+        }
+
     }
 }

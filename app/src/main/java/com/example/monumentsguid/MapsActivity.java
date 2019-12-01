@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -68,7 +69,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final int DEFAULT_ZOOM = 13;
+    private static final int DEFAULT_ZOOM = 17;
     private static final int RADIUS = 20;
     private LatLng mDefaultLocation;
 
@@ -179,6 +180,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (showPopupInfo) {
+            mPopupWindow.dismiss();
+            showPopupInfo = false;
+            Button btnLeft = findViewById(R.id.btn_info);
+            Button btnRight = findViewById(R.id.btn_trasa);
+            Button btnMiddle = findViewById(R.id.btn_kamera);
+            btnLeft.setEnabled(true);
+            btnRight.setEnabled(true);
+            btnMiddle.setEnabled(true);
+            btnMenu.setEnabled(true);
+        } else {
+            super.onBackPressed();
+            startActivity(new Intent(this, MainActivity.class));
+            mMap.clear();
+            mClusterManager.clearItems();
+            this.finish();
         }
     }
 
@@ -355,7 +377,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         i.putExtra("image", curImage);
                         i.putExtra("customImagePath", customImagePath);
                         i.putExtra("customImageDate", customImageDate);
+                        i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                        i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                         i.putExtra("mode", "fromMapsActivity");
+                        i.putExtra("image_exists", true);
                         startActivity(i);
 
                         // jeżeli jeszcze nie ma
@@ -876,6 +901,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         i.putExtra("comment", curComment);
                         i.putExtra("image", curImage);
                         i.putExtra("year", curYear);
+                        i.putExtra("image_exists", false);
                         startActivity(i);
                     }
                 });

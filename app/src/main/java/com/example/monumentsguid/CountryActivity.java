@@ -29,8 +29,7 @@ public class CountryActivity extends AppCompatActivity {
 
     private List<City> citiesFiltered;
     private List<Monument> monumentsFiltered;
-    private List<ObservationPoint> observationPointsFiltered;
-
+    private List<ObservationPoint> observationPointsFilteredCountry;
     private List<GridItem> countryItems;
     private List<String> countryIds;
 
@@ -56,7 +55,7 @@ public class CountryActivity extends AppCompatActivity {
                             for (ObservationPoint observationPoint : observationPoints) {
                                 String monumentRef = observationPoint.getMonumentRef();
                                 if (monumentRef.equals(monumentId)) {
-                                    observationPointsFiltered.add(observationPoint);
+                                    observationPointsFilteredCountry.add(observationPoint);
                                 }
                             }
                         }
@@ -68,10 +67,12 @@ public class CountryActivity extends AppCompatActivity {
             // wysyła odfiltrowane dane do widoku miast
             Intent i = new Intent(getApplicationContext(),
                     CityActivity.class);
-            i.putExtra("id", countryId);
-            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) citiesFiltered);
-            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monumentsFiltered);
-            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPointsFiltered);
+            i.putExtra("country_id", countryId);
+            i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCountry);
             startActivity(i);
         }
     };
@@ -88,7 +89,7 @@ public class CountryActivity extends AppCompatActivity {
 
         citiesFiltered = new ArrayList<>();
         monumentsFiltered = new ArrayList<>();
-        observationPointsFiltered = new ArrayList<>();
+        observationPointsFilteredCountry = new ArrayList<>();
 
         countryItems = new ArrayList<>();
 
@@ -104,6 +105,13 @@ public class CountryActivity extends AppCompatActivity {
 
         countryIds = new ArrayList<>();
         addGridItems();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(this, MainActivity.class));
+        this.finish();
     }
 
     private void addGridItems() {

@@ -51,16 +51,15 @@
         android:layout_height="match_parent"
         android:layout_below="@id/info_top"
         android:fillViewport="true"
+        android:layout_gravity="center_vertical"
         android:scrollbars="vertical">
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:id="@+id/info_image_layout"
-                android:paddingTop="10sp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"

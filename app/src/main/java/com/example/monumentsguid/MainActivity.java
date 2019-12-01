@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
      * Metoda wyciągająca samą datę z obiektu typu Date w celu prezentacji w aplikacji
      */
     private String getSimpleDate(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
         return sdf.format(date);
     }
 
