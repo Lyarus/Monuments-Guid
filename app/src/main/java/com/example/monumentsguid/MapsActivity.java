@@ -198,6 +198,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             super.onBackPressed();
             startActivity(new Intent(this, MainActivity.class));
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             mMap.clear();
             mClusterManager.clearItems();
             this.finish();
@@ -343,6 +344,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 view.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 mMap.clear();
             }
         });
@@ -382,6 +384,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         i.putExtra("mode", "fromMapsActivity");
                         i.putExtra("image_exists", true);
                         startActivity(i);
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
                         // jeżeli jeszcze nie ma
                     } else {
@@ -429,7 +432,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-
         btnRight.setVisibility(View.VISIBLE);
 
         // Wstawia wartosc prycisku Info - pokazuje pzycisk
@@ -525,6 +527,144 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
+     * Definiuje co się stanie, kiedy klikamy na cluster (przyblizamy kamere)
+     */
+    @Override
+    public boolean onClusterClick(Cluster<ClusterItem> cluster) {
+        Button btnLeft = findViewById(R.id.btn_info);
+        btnLeft.setVisibility(View.INVISIBLE);
+        Button btnRight = findViewById(R.id.btn_trasa);
+        btnRight.setVisibility(View.INVISIBLE);
+        Button btnCenter = findViewById(R.id.btn_kamera);
+        btnCenter.setVisibility(View.INVISIBLE);
+        // Create the builder to collect all essential cluster items for the bounds.
+        LatLngBounds.Builder builder = LatLngBounds.builder();
+        for (ClusterItem item : cluster.getItems()) {
+            builder.include(item.getPosition());
+        }
+        // Get the LatLngBounds
+        final LatLngBounds bounds = builder.build();
+
+        // Animate camera to the bounds
+        try {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    /**
+     * Tworzy popup z informacja o zabytku
+     */
+    private void setPopupWindowContent(String mode, View view, int width, int height, String title, String image, String description, final String customImagePath, final String customImageDate, Button btnLeft, Button btnCenter, Button btnRight) {
+        // przypisuje dane do zmiennych tymczasowych, jezeli pokazujemy popup z informacją
+        curName = title;
+        curMonumentImage = image;
+        curDescription = description;
+        // Tworzy popup
+        mPopupWindow = new PopupWindow(view, width, height);
+        mPopupWindow.setElevation(5.0f);
+        // Ustawia elementy popupa
+        Button btnClose = null;
+        Button btnOk = null;
+        TextView infoTitle = null;
+        ImageView infoImage = null;
+        TextView infoDescription = null;
+        LinearLayout imageLayout = null;
+        if (view != null) {
+            infoTitle = view.findViewById(R.id.info_text_title);
+            infoImage = view.findViewById(R.id.info_image);
+            infoDescription = view.findViewById(R.id.info_text_description);
+            btnClose = view.findViewById(R.id.close);
+            btnOk = view.findViewById(R.id.ok);
+            imageLayout = view.findViewById(R.id.info_image_layout);
+        }
+        if (btnClose != null && btnOk != null && infoTitle != null && infoImage != null && infoDescription != null) {
+            btnOk.setVisibility(View.GONE);
+            // Jezeli przekzujemy dane wskazowki
+            if (mode.equals("prompt")) {
+                // pobieramy dane wskazówki
+                title = getString(R.string.wskazowka_naglowek);
+                if (curIsHorizontal) {
+                    image = "horizontal";
+                    description = getString(R.string.wskazowka_tresc_poziomo);
+                } else {
+                    image = "vertical";
+                    description = getString(R.string.wskazowka_tresc_pionowo);
+                }
+                // ustawiamy odpowiednio obrazek
+                if (image.equals("vertical")) {
+                    infoImage.setImageResource(R.drawable.vertical);
+                } else {
+                    infoImage.setImageResource(R.drawable.horizontal);
+                }
+                // definiujemy przycisk Ok, włączający kamerę
+                ViewGroup.LayoutParams paramsOk = btnOk.getLayoutParams();
+                paramsOk.width = screenWidth / 4;
+                btnOk.setLayoutParams(paramsOk);
+                btnOk.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // wlacza kamere
+                        Intent i = new Intent(getApplicationContext(), CapturePictureActivity.class);
+                        i.putExtra("id", curId);
+                        i.putExtra("lat", curLat);
+                        i.putExtra("lng", curLng);
+                        i.putExtra("name", curName);
+                        i.putExtra("comment", curComment);
+                        i.putExtra("description", curDescription);
+                        i.putExtra("image", curImage);
+                        i.putExtra("year", curYear);
+                        i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                        i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                        i.putExtra("image_exists", false);
+                        startActivity(i);
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                    }
+                });
+                btnOk.setVisibility(View.VISIBLE);
+            } else {
+                // ladujemy obrazek
+                new DownloadImageTask(infoImage).execute(image);
+            }
+            // Wstawia nagłówek
+            infoTitle.setText(Html.fromHtml(title));
+            // Wstawia opis
+            infoDescription.setText(description);
+            // Wstawia obrazek
+            ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
+            params.height = imageLayoutHeight;
+            imageLayout.setLayoutParams(params);
+            // Ustwienia przycisku na wyłączenie
+            btnClose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Dismiss the popup window
+                    mPopupWindow.dismiss();
+                    showPopupInfo = false;
+                    Button btnLeft = findViewById(R.id.btn_info);
+                    Button btnRight = findViewById(R.id.btn_trasa);
+                    Button btnCenter = findViewById(R.id.btn_kamera);
+                    btnLeft.setEnabled(true);
+                    btnRight.setEnabled(true);
+                    btnCenter.setEnabled(true);
+                    btnMenu.setEnabled(true);
+                    curName = null;
+                    curMonumentImage = null;
+                    curDescription = null;
+                }
+            });
+        }
+        // Pokazuje popup po środku, przyciski ustawia na nieaktywne
+        mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
+        btnLeft.setEnabled(false);
+        btnRight.setEnabled(false);
+        btnCenter.setEnabled(false);
+        btnMenu.setEnabled(false);
+    }
+
+    /**
      * Prompts the user for permission to use the device location.
      */
     private void getLocationPermission() {
@@ -534,13 +674,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          * onRequestPermissionsResult.
          */
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
         } else {
             ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
 
@@ -593,7 +731,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (mLocationManager != null) {
                     mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, mLocationListener);
                 }
-
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
@@ -713,31 +850,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return data;
     }
 
-    @Override
-    public boolean onClusterClick(Cluster<ClusterItem> cluster) {
-        Button btnLeft = findViewById(R.id.btn_info);
-        btnLeft.setVisibility(View.INVISIBLE);
-        Button btnRight = findViewById(R.id.btn_trasa);
-        btnRight.setVisibility(View.INVISIBLE);
-        Button btnCenter = findViewById(R.id.btn_kamera);
-        btnCenter.setVisibility(View.INVISIBLE);
-        // Create the builder to collect all essential cluster items for the bounds.
-        LatLngBounds.Builder builder = LatLngBounds.builder();
-        for (ClusterItem item : cluster.getItems()) {
-            builder.include(item.getPosition());
-        }
-        // Get the LatLngBounds
-        final LatLngBounds bounds = builder.build();
-
-        // Animate camera to the bounds
-        try {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
     /**
      * A class to download data from Google Directions URL
      */
@@ -840,110 +952,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             } else
                 Toast.makeText(getApplicationContext(), "Nie znaleziono trasy.", Toast.LENGTH_LONG).show();
         }
-    }
-
-    /**
-     * Tworzy popup z informacja o zabytku
-     */
-    private void setPopupWindowContent(String mode, View view, int width, int height, String title, String image, String description, final String customImagePath, final String customImageDate, Button btnLeft, Button btnCenter, Button btnRight) {
-        // przypisuje dane do zmiennych tymczasowych, jezeli pokazujemy popup z informacją
-        curName = title;
-        curMonumentImage = image;
-        curDescription = description;
-        // Tworzy popup
-        mPopupWindow = new PopupWindow(view, width, height);
-        mPopupWindow.setElevation(5.0f);
-        // Ustawia elementy popupa
-        Button btnClose = null;
-        Button btnOk = null;
-        TextView infoTitle = null;
-        ImageView infoImage = null;
-        TextView infoDescription = null;
-        LinearLayout imageLayout = null;
-        if (view != null) {
-            infoTitle = view.findViewById(R.id.info_text_title);
-            infoImage = view.findViewById(R.id.info_image);
-            infoDescription = view.findViewById(R.id.info_text_description);
-            btnClose = view.findViewById(R.id.close);
-            btnOk = view.findViewById(R.id.ok);
-            imageLayout = view.findViewById(R.id.info_image_layout);
-        }
-        if (btnClose != null && btnOk != null && infoTitle != null && infoImage != null && infoDescription != null) {
-            btnOk.setVisibility(View.GONE);
-            // Jezeli przekzujemy dane wskazowki
-            if (mode.equals("prompt")) {
-                // pobieramy dane wskazówki
-                title = getString(R.string.wskazowka_naglowek);
-                if (curIsHorizontal) {
-                    image = "horizontal";
-                    description = getString(R.string.wskazowka_tresc_poziomo);
-                } else {
-                    image = "vertical";
-                    description = getString(R.string.wskazowka_tresc_pionowo);
-                }
-                // ustawiamy odpowiednio obrazek
-                if (image.equals("vertical")) {
-                    infoImage.setImageResource(R.drawable.vertical);
-                } else {
-                    infoImage.setImageResource(R.drawable.horizontal);
-                }
-                // definiujemy przycisk Ok, włączający kamerę
-                ViewGroup.LayoutParams paramsOk = btnOk.getLayoutParams();
-                paramsOk.width = screenWidth / 4;
-                btnOk.setLayoutParams(paramsOk);
-                btnOk.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // wlacza kamere
-                        Intent i = new Intent(getApplicationContext(), CapturePictureActivity.class);
-                        i.putExtra("id", curId);
-                        i.putExtra("name", curName);
-                        i.putExtra("comment", curComment);
-                        i.putExtra("image", curImage);
-                        i.putExtra("year", curYear);
-                        i.putExtra("image_exists", false);
-                        startActivity(i);
-                    }
-                });
-                btnOk.setVisibility(View.VISIBLE);
-            } else {
-                // ladujemy obrazek
-                new DownloadImageTask(infoImage).execute(image);
-            }
-            // Wstawia nagłówek
-            infoTitle.setText(Html.fromHtml(title));
-            // Wstawia opis
-            infoDescription.setText(description);
-            // Wstawia obrazek
-            ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
-            params.height = imageLayoutHeight;
-            imageLayout.setLayoutParams(params);
-            // Ustwienia przycisku na wyłączenie
-            btnClose.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Dismiss the popup window
-                    mPopupWindow.dismiss();
-                    showPopupInfo = false;
-                    Button btnLeft = findViewById(R.id.btn_info);
-                    Button btnRight = findViewById(R.id.btn_trasa);
-                    Button btnCenter = findViewById(R.id.btn_kamera);
-                    btnLeft.setEnabled(true);
-                    btnRight.setEnabled(true);
-                    btnCenter.setEnabled(true);
-                    btnMenu.setEnabled(true);
-                    curName = null;
-                    curMonumentImage = null;
-                    curDescription = null;
-                }
-            });
-        }
-        // Pokazuje popup po środku, przyciski ustawia na nieaktywne
-        mPopupWindow.showAtLocation(layoutMapa, Gravity.CENTER, 0, 0);
-        btnLeft.setEnabled(false);
-        btnRight.setEnabled(false);
-        btnCenter.setEnabled(false);
-        btnMenu.setEnabled(false);
     }
 
     public static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {

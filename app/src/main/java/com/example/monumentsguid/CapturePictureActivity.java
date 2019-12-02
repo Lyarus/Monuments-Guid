@@ -69,11 +69,13 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
         image = Objects.requireNonNull(intent.getExtras()).getString("image");
         year = Objects.requireNonNull(intent.getExtras()).getString("year");
-        customImagePathExists = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
-        customImageDateExists = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
         monuments = intent.getParcelableArrayListExtra("monuments");
         observationPoints = intent.getParcelableArrayListExtra("observationPoints");
         image_exists = Objects.requireNonNull(intent.getExtras().getBoolean("image_exists"));
+        if (image_exists) {
+            customImagePathExists = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
+            customImageDateExists = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
+        }
 
 
         //check if app has permission to access the camera.
@@ -132,6 +134,7 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             i.putExtra("mode", "fromMapsActivity");
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             this.finish();
         } else {
             Intent i = new Intent(this, MapsActivity.class);
@@ -140,6 +143,7 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
             i.putExtra("lat", lat);
             i.putExtra("lng", lng);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             this.finish();
         }
     }

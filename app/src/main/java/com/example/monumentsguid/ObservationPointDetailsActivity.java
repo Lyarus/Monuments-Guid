@@ -165,6 +165,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
                     i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                     i.putExtra("image_exists", true);
                     startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
             btnLeft.setVisibility(View.VISIBLE);
@@ -188,12 +189,12 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         for (ObservationPoint observationPoint : observationPoints) {
             if (observationPoint.getMonumentRef().equals(monument_ref)) {
                 observationPointsFilteredMonument.add(observationPoint);
             }
         }
-        super.onBackPressed();
         if (mode.equals("fromMapsShowActivity")) {
             Intent i = new Intent(getApplicationContext(), MapsShowActivity.class);
             i.putExtra("monument_id", monument_ref);
@@ -210,6 +211,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredMonument);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             this.finish();
         } else if (mode.equals("fromMapsActivity")) {
             for (ObservationPoint observationPoint : observationPoints) {
@@ -224,6 +226,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             i.putExtra("lat", lat);
             i.putExtra("lng", lng);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             this.finish();
         }
 

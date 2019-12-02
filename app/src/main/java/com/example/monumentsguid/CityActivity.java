@@ -68,6 +68,7 @@ public class CityActivity extends AppCompatActivity {
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCity);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         }
     };
 
@@ -104,12 +105,15 @@ public class CityActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         Intent intent = new Intent(this, CountryActivity.class);
         intent.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
         intent.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
         intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
         intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        this.finish();
     }
 
     private void addGridItems() {

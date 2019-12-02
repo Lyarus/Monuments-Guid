@@ -73,6 +73,7 @@ public class MonumentActivity extends AppCompatActivity {
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredMonument);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         }
     };
 
@@ -142,7 +143,9 @@ public class MonumentActivity extends AppCompatActivity {
         i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
         i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
         i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCountry);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         startActivity(i);
+        this.onBackPressed();
     }
 
     private void addGridItems() {

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +36,7 @@ import java.util.Objects;
 import static android.content.ContentValues.TAG;
 
 public class MainActivity extends AppCompatActivity {
+    public long back_pressed;
 
     public List<Country> countries;
     public List<City> cities;
@@ -93,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                 intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 view.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
 
@@ -108,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                 intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 view.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
 
@@ -121,8 +125,22 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), InfoActivity.class);
                 view.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
+    }
+
+    // wyłącza aplikację przy podwójnym kliknięciu
+    @Override
+    public void onBackPressed() {
+        if (back_pressed + 1000 > System.currentTimeMillis()) {
+            this.finish();
+            System.exit(0);
+        } else {
+            String textMess = getString(R.string.double_click_on_exit_text);
+            Toast.makeText(getBaseContext(), textMess, Toast.LENGTH_SHORT).show();
+        }
+        back_pressed = System.currentTimeMillis();
     }
 
     // pobiera dane krajow z BD

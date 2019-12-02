@@ -182,6 +182,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCity);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             this.finish();
         }
     }
@@ -283,6 +284,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 view.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 mMap.clear();
             }
         });
@@ -343,7 +345,9 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-
+    /**
+     * Tworzy dolne przyciski
+     */
     private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final String id, final String comment, final double lat, final double lng, final String name, final String monument_image, final String description, final String image, final String year, final String customImagePath, final String customImageDate, final View customView) {
         // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
         final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
@@ -352,13 +356,13 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         btnRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(),
-                        MapsActivity.class);
+                Intent i = new Intent(getApplicationContext(), MapsActivity.class);
+                i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPointsFiltered);
                 i.putExtra("lat", lat);
                 i.putExtra("lng", lng);
-                i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFiltered);
-                i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                 startActivity(i);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 mMap.clear();
             }
         });
@@ -394,6 +398,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                     i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFiltered);
                     i.putExtra("mode", "fromMapsShowActivity");
                     startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
             btnCenter.setVisibility(View.VISIBLE);

@@ -74,6 +74,7 @@ public class CountryActivity extends AppCompatActivity {
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCountry);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         }
     };
 
@@ -111,6 +112,7 @@ public class CountryActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         this.finish();
     }
 
