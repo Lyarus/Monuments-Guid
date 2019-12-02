@@ -134,8 +134,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (back_pressed + 1000 > System.currentTimeMillis()) {
-            this.finish();
-            System.exit(0);
+            finish();
+            moveTaskToBack(true);
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(1);
+
         } else {
             String textMess = getString(R.string.double_click_on_exit_text);
             Toast.makeText(getBaseContext(), textMess, Toast.LENGTH_SHORT).show();

@@ -76,8 +76,6 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
             customImagePathExists = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
             customImageDateExists = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
         }
-
-
         //check if app has permission to access the camera.
         if (EasyPermissions.hasPermissions(CapturePictureActivity.this, Manifest.permission.CAMERA)) {
             launchCamera();
@@ -96,55 +94,56 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
         //Preview the image captured by the camera
         if (requestCode == CAMERA_REQUEST_CODE) {
             String customImageDate = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
+            File file = new File(customImagePath);
+            if (file.length() != 0) {
+                Intent i = new Intent(getApplicationContext(), ObservationPointDetailsActivity.class);
+                i.putExtra("id", id);
+                i.putExtra("lat", lat);
+                i.putExtra("lng", lng);
+                i.putExtra("name", name);
+                i.putExtra("comment", comment);
+                i.putExtra("description", description);
+                i.putExtra("image", image);
+                i.putExtra("year", year);
+                i.putExtra("customImagePath", customImagePath);
+                i.putExtra("customImageDate", customImageDate);
+                i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                i.putExtra("mode", "fromMapsActivity");
+                startActivity(i);
+            } else {
+                boolean deleted = file.delete();
+                Log.v("log_tag", "deleted: " + deleted);
 
-            Intent i = new Intent(getApplicationContext(), ObservationPointDetailsActivity.class);
-            i.putExtra("id", id);
-            i.putExtra("lat", lat);
-            i.putExtra("lng", lng);
-            i.putExtra("name", name);
-            i.putExtra("comment", comment);
-            i.putExtra("description", description);
-            i.putExtra("image", image);
-            i.putExtra("year", year);
-            i.putExtra("customImagePath", customImagePath);
-            i.putExtra("customImageDate", customImageDate);
-            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
-            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
-            i.putExtra("mode", "fromMapsActivity");
-            startActivity(i);
-        }
-    }
+                if (image_exists) {
+                    Intent i = new Intent(this, ObservationPointDetailsActivity.class);
+                    i.putExtra("id", id);
+                    i.putExtra("lat", lat);
+                    i.putExtra("lng", lng);
+                    i.putExtra("name", name);
+                    i.putExtra("comment", comment);
+                    i.putExtra("description", description);
+                    i.putExtra("image", image);
+                    i.putExtra("year", year);
+                    i.putExtra("customImagePath", customImagePathExists);
+                    i.putExtra("customImageDate", customImageDateExists);
+                    i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                    i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                    i.putExtra("mode", "fromMapsActivity");
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                } else {
+                    Intent i = new Intent(this, MapsActivity.class);
+                    i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                    i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                    i.putExtra("lat", lat);
+                    i.putExtra("lng", lng);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if (image_exists) {
-            Intent i = new Intent(this, ObservationPointDetailsActivity.class);
-            i.putExtra("id", id);
-            i.putExtra("lat", lat);
-            i.putExtra("lng", lng);
-            i.putExtra("name", name);
-            i.putExtra("comment", comment);
-            i.putExtra("description", description);
-            i.putExtra("image", image);
-            i.putExtra("year", year);
-            i.putExtra("customImagePath", customImagePathExists);
-            i.putExtra("customImageDate", customImageDateExists);
-            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
-            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
-            i.putExtra("mode", "fromMapsActivity");
-            startActivity(i);
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-            this.finish();
-        } else {
-            Intent i = new Intent(this, MapsActivity.class);
-            i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
-            i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
-            i.putExtra("lat", lat);
-            i.putExtra("lng", lng);
-            startActivity(i);
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-            this.finish();
+            }
+
         }
     }
 
