@@ -69,11 +69,11 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         customImagePath = Objects.requireNonNull(intent.getExtras()).getString("customImagePath");
         customImageDate = Objects.requireNonNull(intent.getExtras()).getString("customImageDate");
         mode = Objects.requireNonNull(intent.getExtras()).getString("mode");
+        countries = getIntent().getParcelableArrayListExtra("countries");
+        cities = getIntent().getParcelableArrayListExtra("cities");
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
         if (mode != null && mode.equals("fromMapsShowActivity")) {
-            countries = getIntent().getParcelableArrayListExtra("countries");
-            cities = getIntent().getParcelableArrayListExtra("cities");
             country_ref = Objects.requireNonNull(intent.getExtras()).getString("country_ref");
             city_ref = Objects.requireNonNull(intent.getExtras()).getString("city_ref");
             monument_ref = Objects.requireNonNull(intent.getExtras()).getString("monument_ref");
@@ -161,6 +161,8 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
                     i.putExtra("year", year);
                     i.putExtra("customImagePath", customImagePath);
                     i.putExtra("customImageDate", customImageDate);
+                    i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                    i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                     i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                     i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                     i.putExtra("image_exists", true);
@@ -221,6 +223,8 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
                 }
             }
             Intent i = new Intent(this, MapsActivity.class);
+            i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+            i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
             i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
             i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
             i.putExtra("lat", lat);

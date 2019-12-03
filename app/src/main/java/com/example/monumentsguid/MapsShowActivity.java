@@ -39,12 +39,12 @@ import java.util.Objects;
 
 public class MapsShowActivity extends FragmentActivity implements OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterItem> {
     private static final int DEFAULT_ZOOM = 17;
-    private List<ObservationPoint> observationPointsFiltered;
-    private List<ObservationPoint> observationPoints;
-    private List<ObservationPoint> observationPointsFilteredCity;
     private List<Country> countries;
-    private List<Monument> monuments;
     private List<City> cities;
+    private List<Monument> monuments;
+    private List<ObservationPoint> observationPoints;
+    private List<ObservationPoint> observationPointsFiltered;
+    private List<ObservationPoint> observationPointsFilteredCity;
     private String city_ref;
     private String monument_ref;
     private String country_ref;
@@ -358,7 +358,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), MapsActivity.class);
                 i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
-                i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPointsFiltered);
+                i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 i.putExtra("lat", lat);
                 i.putExtra("lng", lng);
                 startActivity(i);

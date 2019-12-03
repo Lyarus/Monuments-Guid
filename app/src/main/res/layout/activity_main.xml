@@ -44,13 +44,6 @@
                 android:layout_marginBottom="15sp"
                 android:contentDescription="@string/ikonka_aplikacji"
                 android:src="@drawable/default_monument" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
         </LinearLayout>
 
         <LinearLayout

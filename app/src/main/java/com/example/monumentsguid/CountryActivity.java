@@ -111,7 +111,12 @@ public class CountryActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        startActivity(new Intent(this, MainActivity.class));
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+        intent.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+        intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+        intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+        startActivity(intent);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         this.finish();
     }

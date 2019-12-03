@@ -32,6 +32,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import com.example.monumentsguid.Entities.City;
+import com.example.monumentsguid.Entities.Country;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -70,12 +72,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String KEY_LOCATION = "location";
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 17;
-    private static final int RADIUS = 20;
+    private static final int RADIUS = 5;
     private LatLng mDefaultLocation;
 
     private GoogleMap mMap;
     private Context mContext;
 
+    private List<Country> countries;
+    private List<City> cities;
     private List<Monument> monuments;
     private List<ObservationPoint> observationPoints;
 
@@ -134,6 +138,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = getIntent();
         latFromDetails = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
         lngFromDetails = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
+        countries = getIntent().getParcelableArrayListExtra("countries");
+        cities = getIntent().getParcelableArrayListExtra("cities");
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
 
@@ -197,7 +203,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             btnMenu.setEnabled(true);
         } else {
             super.onBackPressed();
-            startActivity(new Intent(this, MainActivity.class));
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+            intent.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+            intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+            intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+            startActivity(intent);
             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             mMap.clear();
             mClusterManager.clearItems();
@@ -343,9 +354,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
-                view.getContext().startActivity(intent);
+                intent.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                intent.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+                intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 mMap.clear();
+                mClusterManager.clearItems();
             }
         });
 
@@ -379,6 +395,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         i.putExtra("image", curImage);
                         i.putExtra("customImagePath", customImagePath);
                         i.putExtra("customImageDate", customImageDate);
+                        i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                        i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                         i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                         i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                         i.putExtra("mode", "fromMapsActivity");
@@ -616,6 +634,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         i.putExtra("description", curDescription);
                         i.putExtra("image", curImage);
                         i.putExtra("year", curYear);
+                        i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                        i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                         i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                         i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                         i.putExtra("image_exists", false);

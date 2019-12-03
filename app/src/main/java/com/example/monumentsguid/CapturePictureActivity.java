@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import com.example.monumentsguid.Entities.City;
+import com.example.monumentsguid.Entities.Country;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 
@@ -39,6 +41,8 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
 
     private String customImagePathExists;
     private String customImageDateExists;
+    private List<Country> countries;
+    private List<City> cities;
     private List<Monument> monuments;
     private List<ObservationPoint> observationPoints;
     private String id;
@@ -69,6 +73,8 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
         image = Objects.requireNonNull(intent.getExtras()).getString("image");
         year = Objects.requireNonNull(intent.getExtras()).getString("year");
+        countries = intent.getParcelableArrayListExtra("countries");
+        cities = intent.getParcelableArrayListExtra("cities");
         monuments = intent.getParcelableArrayListExtra("monuments");
         observationPoints = intent.getParcelableArrayListExtra("observationPoints");
         image_exists = Objects.requireNonNull(intent.getExtras().getBoolean("image_exists"));
@@ -107,6 +113,8 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
                 i.putExtra("year", year);
                 i.putExtra("customImagePath", customImagePath);
                 i.putExtra("customImageDate", customImageDate);
+                i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                 i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                 i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 i.putExtra("mode", "fromMapsActivity");
@@ -127,6 +135,8 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
                     i.putExtra("year", year);
                     i.putExtra("customImagePath", customImagePathExists);
                     i.putExtra("customImageDate", customImageDateExists);
+                    i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                    i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                     i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                     i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                     i.putExtra("mode", "fromMapsActivity");
@@ -134,6 +144,8 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 } else {
                     Intent i = new Intent(this, MapsActivity.class);
+                    i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                    i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                     i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                     i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                     i.putExtra("lat", lat);
