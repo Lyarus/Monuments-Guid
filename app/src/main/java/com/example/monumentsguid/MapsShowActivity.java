@@ -48,8 +48,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     private String city_ref;
     private String monument_ref;
     private String country_ref;
-    private double lat;
-    private double lng;
     private String curCustomImagePath;
     private String curCustomImageDate;
     private String monument_image;
@@ -58,7 +56,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
 
     private GoogleMap mMap;
     private LatLng location;
-    private LatLng mDefaultLocation;
     // rozmiar ekranu urzadzenia
     int screenHeight;
     int screenWidth;
@@ -93,8 +90,8 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         country_ref = Objects.requireNonNull(intent.getExtras()).getString("country_ref");
         city_ref = Objects.requireNonNull(intent.getExtras()).getString("city_ref");
         name = Objects.requireNonNull(intent.getExtras()).getString("name");
-        lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
-        lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
+        double lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
+        double lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
         monument_image = Objects.requireNonNull(intent.getExtras()).getString("image");
         if (monument_image != null && monument_image.equals("")) {
@@ -258,7 +255,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         if (location != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
         } else {
-            mDefaultLocation = new LatLng(51.098781, 17.036716);
+            LatLng mDefaultLocation = new LatLng(51.098781, 17.036716);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, 10));
         }
 

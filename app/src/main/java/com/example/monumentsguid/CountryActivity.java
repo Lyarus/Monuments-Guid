@@ -27,8 +27,6 @@ public class CountryActivity extends AppCompatActivity {
     private List<Monument> monuments;
     private List<ObservationPoint> observationPoints;
 
-    private List<City> citiesFiltered;
-    private List<Monument> monumentsFiltered;
     private List<ObservationPoint> observationPointsFilteredCountry;
     private List<GridItem> countryItems;
     private List<String> countryIds;
@@ -43,13 +41,11 @@ public class CountryActivity extends AppCompatActivity {
             for (City city : cities) {
                 String countryRef = city.getCountryRef();
                 if (countryRef.equals(countryId)) {
-                    citiesFiltered.add(city);
                     String cityId = city.getId();
                     // filtruje zabytki miast wybranego kraju
                     for (Monument monument : monuments) {
                         String cityRef = monument.getCityRef();
                         if (cityRef.equals(cityId)) {
-                            monumentsFiltered.add(monument);
                             String monumentId = monument.getId();
                             // filtrue punkty obserwacji zabytków miast wybranego kraju
                             for (ObservationPoint observationPoint : observationPoints) {
@@ -87,9 +83,6 @@ public class CountryActivity extends AppCompatActivity {
         cities = getIntent().getParcelableArrayListExtra("cities");
         monuments = getIntent().getParcelableArrayListExtra("monuments");
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
-
-        citiesFiltered = new ArrayList<>();
-        monumentsFiltered = new ArrayList<>();
         observationPointsFilteredCountry = new ArrayList<>();
 
         countryItems = new ArrayList<>();

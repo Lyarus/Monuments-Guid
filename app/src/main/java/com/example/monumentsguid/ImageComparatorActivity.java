@@ -43,9 +43,6 @@ public class ImageComparatorActivity extends Activity {
     private List<Monument> monuments;
     private List<ObservationPoint> observationPoints;
 
-    private ImageView newPicture;
-    private ImageView oldPicture;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,12 +82,12 @@ public class ImageComparatorActivity extends Activity {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
 
-        oldPicture = findViewById(R.id.oldPicture);
+        ImageView oldPicture = findViewById(R.id.oldPicture);
         if (image != null) {
             new MapsActivity.DownloadImageTask(oldPicture).execute(image);
         }
 
-        newPicture = findViewById(R.id.newPicture);
+        ImageView newPicture = findViewById(R.id.newPicture);
         if (customImagePath != null) {
             File file = new File(customImagePath);
             if (file.exists()) {

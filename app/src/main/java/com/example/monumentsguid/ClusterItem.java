@@ -48,10 +48,6 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
         this.name = name;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
     public String getComment() {
         return comment;
     }
@@ -71,20 +67,12 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
         return comment;
     }
 
-    public String getMonument_image() {
+    String getMonument_image() {
         return monument_image;
     }
 
-    public void setMonument_image(String monument_image) {
-        this.monument_image = monument_image;
-    }
-
-    public String getDescription() {
+    String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getImage() {
@@ -95,43 +83,23 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
         this.image = image;
     }
 
-    public String getYear() {
+    String getYear() {
         return year;
     }
 
-    public void setYear(String year) {
-        this.year = year;
-    }
-
-    public int getRadius() {
+    int getRadius() {
         return radius;
     }
 
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    public boolean isHorizontal() {
+    boolean isHorizontal() {
         return isHorizontal;
     }
 
-    public void setHorizontal(boolean horizontal) {
-        isHorizontal = horizontal;
-    }
-
-    public String getCustomImagePath() {
+    String getCustomImagePath() {
         return customImagePath;
     }
 
-    public void setCustomImagePath(String customImagePath) {
-        this.customImagePath = customImagePath;
-    }
-
-    public String getCustomImageDate() {
+    String getCustomImageDate() {
         return customImageDate;
-    }
-
-    public void setCustomImageDate(String customImageDate) {
-        this.customImageDate = customImageDate;
     }
 }

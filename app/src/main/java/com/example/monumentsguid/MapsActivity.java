@@ -268,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
                 createBottomBtns(btnLeft, btnCenter, btnRight, curLat, curLng, curName, curMonumentImage, curDescription, curCustomImagePath, curCustomImageDate, customView, isCamera);
-                setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, curName, curMonumentImage, curDescription, curCustomImagePath, curCustomImageDate, btnLeft, btnCenter, btnRight);
+                setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, curName, curMonumentImage, curDescription, btnLeft, btnCenter, btnRight);
             }
         }
     }
@@ -396,7 +396,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // pokazuje popup ze wskazówką
                         curPopupMode = "prompt";
                         showPopupInfo = true;
-                        setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnMiddle, btnRight);
+                        setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnMiddle, btnRight);
                     }
                 }
             });
@@ -450,7 +450,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 curPopupMode = "info";
                 showPopupInfo = true;
                 if (inflater != null) {
-                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, customImagePath, customImageDate, btnLeft, btnMiddle, btnRight);
+                    setPopupWindowContent(curPopupMode, customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnMiddle, btnRight);
                 }
             }
         });
@@ -562,7 +562,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Tworzy popup z informacja o zabytku
      */
-    private void setPopupWindowContent(String mode, View view, int width, int height, String title, String image, String description, final String customImagePath, final String customImageDate, Button btnLeft, Button btnCenter, Button btnRight) {
+    private void setPopupWindowContent(String mode, View view, int width, int height, String title, String image, String description, Button btnLeft, Button btnCenter, Button btnRight) {
         // przypisuje dane do zmiennych tymczasowych, jezeli pokazujemy popup z informacją
         curName = title;
         curMonumentImage = image;

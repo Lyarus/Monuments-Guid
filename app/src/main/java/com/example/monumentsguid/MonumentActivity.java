@@ -145,7 +145,7 @@ public class MonumentActivity extends AppCompatActivity {
         i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFilteredCountry);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         startActivity(i);
-        this.onBackPressed();
+        this.finish();
     }
 
     private void addGridItems() {

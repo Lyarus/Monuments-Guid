@@ -26,7 +26,6 @@ public class CityActivity extends AppCompatActivity {
     private List<Monument> monuments;
     private List<ObservationPoint> observationPoints;
     private List<Country> countries;
-    private List<Monument> monumentsFiltered;
     private List<ObservationPoint> observationPointsFiltered;
     private List<ObservationPoint> observationPointsFilteredCity;
     private List<GridItem> cityItems;
@@ -44,7 +43,6 @@ public class CityActivity extends AppCompatActivity {
             for (Monument monument : monuments) {
                 String cityRef = monument.getCityRef();
                 if (cityRef.equals(cityId)) {
-                    monumentsFiltered.add(monument);
                     String monumentId = monument.getId();
                     // filtrue punkty obserwacji zabytków wybranego miasta
                     for (ObservationPoint observationPoint : observationPointsFiltered) {
@@ -85,7 +83,6 @@ public class CityActivity extends AppCompatActivity {
         observationPoints = getIntent().getParcelableArrayListExtra("observationPoints");
         observationPointsFiltered = getIntent().getParcelableArrayListExtra("observationPointsFiltered");
 
-        monumentsFiltered = new ArrayList<>();
         observationPointsFilteredCity = new ArrayList<>();
         cityItems = new ArrayList<>();
 
