@@ -1,4 +1,4 @@
-package com.example.monumentsguid;
+package com.example.monumentsguid.HelpClasses;
 
 public class GridItem {
     private String name;
@@ -6,7 +6,7 @@ public class GridItem {
     private String id;
     private boolean isActive;
 
-    GridItem(String id, String name, String image, boolean isActive) {
+    public GridItem(String id, String name, String image, boolean isActive) {
         this.name = name;
         this.image = image;
         this.id = id;

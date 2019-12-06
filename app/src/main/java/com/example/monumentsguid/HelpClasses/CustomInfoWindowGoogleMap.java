@@ -1,4 +1,4 @@
-package com.example.monumentsguid;
+package com.example.monumentsguid.HelpClasses;
 
 import android.content.Context;
 import android.text.Html;
@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.monumentsguid.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
@@ -13,7 +14,7 @@ public class CustomInfoWindowGoogleMap implements GoogleMap.InfoWindowAdapter {
 
     private Context context;
 
-    CustomInfoWindowGoogleMap(Context ctx) {
+    public CustomInfoWindowGoogleMap(Context ctx) {
         context = ctx;
     }
 

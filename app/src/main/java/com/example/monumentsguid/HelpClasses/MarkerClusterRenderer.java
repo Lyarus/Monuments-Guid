@@ -1,10 +1,11 @@
-package com.example.monumentsguid;
+package com.example.monumentsguid.HelpClasses;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 
 import androidx.core.content.ContextCompat;
 
+import com.example.monumentsguid.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -19,7 +20,7 @@ public class MarkerClusterRenderer extends DefaultClusterRenderer<ClusterItem> {
     private final Context mContext;
     private final IconGenerator mClusterIconGenerator;
 
-    MarkerClusterRenderer(Context context, GoogleMap map, com.google.maps.android.clustering.ClusterManager<ClusterItem> clusterManager) {
+    public MarkerClusterRenderer(Context context, GoogleMap map, com.google.maps.android.clustering.ClusterManager<ClusterItem> clusterManager) {
         super(context, map, clusterManager);
         mContext = context;
         mClusterIconGenerator = new IconGenerator(mContext.getApplicationContext());

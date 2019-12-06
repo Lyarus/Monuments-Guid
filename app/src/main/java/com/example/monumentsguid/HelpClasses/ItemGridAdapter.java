@@ -1,4 +1,4 @@
-package com.example.monumentsguid;
+package com.example.monumentsguid.HelpClasses;
 
 import android.content.Context;
 import android.text.Html;
@@ -10,6 +10,9 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.monumentsguid.MapsActivity;
+import com.example.monumentsguid.R;
+
 import java.util.List;
 
 public class ItemGridAdapter extends BaseAdapter {
@@ -20,7 +23,7 @@ public class ItemGridAdapter extends BaseAdapter {
 
     private List<GridItem> gridItems;
 
-    ItemGridAdapter(Context c, boolean isDefaultImage, List<GridItem> gridItems) {
+    public ItemGridAdapter(Context c, boolean isDefaultImage, List<GridItem> gridItems) {
         this.context = c;
         this.isDefaultImage = isDefaultImage;
         this.gridItems = gridItems;

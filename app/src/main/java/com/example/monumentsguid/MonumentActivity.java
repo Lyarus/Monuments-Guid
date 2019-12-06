@@ -15,6 +15,8 @@ import com.example.monumentsguid.Entities.City;
 import com.example.monumentsguid.Entities.Country;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
+import com.example.monumentsguid.HelpClasses.GridItem;
+import com.example.monumentsguid.HelpClasses.ItemGridAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.monumentsguid;
+package com.example.monumentsguid.HelpClasses;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-class DirectionsJSONParser {
+public class DirectionsJSONParser {
     /**
      * Receives a JSONObject and returns a list of lists containing latitude and longitude
      */
-    List<List<HashMap<String, String>>> parse(JSONObject jObject) {
+    public List<List<HashMap<String, String>>> parse(JSONObject jObject) {
 
         List<List<HashMap<String, String>>> routes = new ArrayList<>();
         JSONArray jRoutes;

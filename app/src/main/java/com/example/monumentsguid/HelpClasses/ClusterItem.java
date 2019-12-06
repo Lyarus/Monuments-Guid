@@ -1,4 +1,4 @@
-package com.example.monumentsguid;
+package com.example.monumentsguid.HelpClasses;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -17,7 +17,7 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
     private String customImagePath;
     private String customImageDate;
 
-    ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id, int radius, boolean isHorizontal, String customImagePath, String customImageDate) {
+    public ClusterItem(double lat, double lng, String name, String comment, String monument_image, String descrition, String image, String year, String id, int radius, boolean isHorizontal, String customImagePath, String customImageDate) {
         this.image = image;
         this.year = year;
         this.id = id;
@@ -67,11 +67,11 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
         return comment;
     }
 
-    String getMonument_image() {
+    public String getMonument_image() {
         return monument_image;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -83,23 +83,23 @@ public class ClusterItem implements com.google.maps.android.clustering.ClusterIt
         this.image = image;
     }
 
-    String getYear() {
+    public String getYear() {
         return year;
     }
 
-    int getRadius() {
+    public int getRadius() {
         return radius;
     }
 
-    boolean isHorizontal() {
+    public boolean isHorizontal() {
         return isHorizontal;
     }
 
-    String getCustomImagePath() {
+    public String getCustomImagePath() {
         return customImagePath;
     }
 
-    String getCustomImageDate() {
+    public String getCustomImageDate() {
         return customImageDate;
     }
 }

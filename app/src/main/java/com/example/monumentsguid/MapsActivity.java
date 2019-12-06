@@ -36,6 +36,10 @@ import com.example.monumentsguid.Entities.City;
 import com.example.monumentsguid.Entities.Country;
 import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
+import com.example.monumentsguid.HelpClasses.ClusterItem;
+import com.example.monumentsguid.HelpClasses.CustomInfoWindowGoogleMap;
+import com.example.monumentsguid.HelpClasses.DirectionsJSONParser;
+import com.example.monumentsguid.HelpClasses.MarkerClusterRenderer;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -286,12 +290,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setMapToolbarEnabled(false);
         // Ustawienia lokalizacji urzadzenia
         updateLocationUI();
-
         if (latFromDetails != 0.0 && lngFromDetails != 0.0) {
-            mOrigin = new LatLng(latFromDetails, lngFromDetails);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, CLOSE_ZOOM));
+            getMyLocation(FAR_ZOOM, false);
+            mDefaultLocation = new LatLng(latFromDetails, lngFromDetails);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, CLOSE_ZOOM));
         } else {
-            getMyLocation(FAR_ZOOM);
+            getMyLocation(FAR_ZOOM, true);
         }
 
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
@@ -417,7 +421,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 // Klikniecie jezeli zabytek nie jest wybrany - rysuje trase
                 if (mDestination == null || !mDestination.equals(curPosition)) {
-                    getMyLocation(CLOSE_ZOOM);
+                    getMyLocation(CLOSE_ZOOM, true);
                     mDestination = curPosition;
                     if (mOrigin != null) {
                         drawRoute();
@@ -705,7 +709,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         updateLocationUI();
     }
 
-    private void getMyLocation(final int zoom) {
+    private void getMyLocation(final int zoom, final boolean animate) {
         // Getting LocationManager object from System Service LOCATION_SERVICE
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         // The entry point to the Fused Location Provider.
@@ -749,14 +753,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
                                 mOrigin = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, zoom));
+                                if (animate) {
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, zoom));
+                                }
                             }
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.animateCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, CLOSE_ZOOM));
+                            if (animate) {
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, zoom));
+                            }
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
@@ -966,7 +973,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
-        DownloadImageTask(ImageView bmImage) {
+        public DownloadImageTask(ImageView bmImage) {
             this.bmImage = bmImage;
         }
 
