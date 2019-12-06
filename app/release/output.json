@@ -9,7 +9,7 @@
       "versionCode": 1,
       "versionName": "1.0",
       "enabled": true,
-      "outputFile": "app-release.apk",
+      "outputFile": "PhotoGuid.apk",
       "fullName": "release",
       "baseName": "release"
     },
