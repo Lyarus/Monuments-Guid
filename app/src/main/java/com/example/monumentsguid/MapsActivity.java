@@ -72,7 +72,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String KEY_LOCATION = "location";
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 17;
-    private static final int RADIUS = 5;
+    private static final int RADIUS = 30;
     private LatLng mDefaultLocation;
 
     private GoogleMap mMap;

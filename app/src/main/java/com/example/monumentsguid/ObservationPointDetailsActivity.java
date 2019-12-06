@@ -136,8 +136,29 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             btnMiddle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //Intent intent = new Intent(view.getContext(), MainActivity.class);
-                    //view.getContext().startActivity(intent);
+                    Intent i = new Intent(getApplicationContext(), ImageComparatorActivity.class);
+                    i.putExtra("id", id);
+                    i.putExtra("lat", lat);
+                    i.putExtra("lng", lng);
+                    i.putExtra("name", name);
+                    i.putExtra("comment", comment);
+                    i.putExtra("description", description);
+                    i.putExtra("image", image);
+                    i.putExtra("year", year);
+                    i.putExtra("customImagePath", customImagePath);
+                    i.putExtra("customImageDate", customImageDate);
+                    i.putExtra("mode", mode);
+                    if (mode != null && mode.equals("fromMapsShowActivity")) {
+                        i.putExtra("country_ref", country_ref);
+                        i.putExtra("city_ref", city_ref);
+                        i.putExtra("monument_ref", monument_ref);
+                    }
+                    i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                    i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+                    i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                    i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
             btnMiddle.setVisibility(View.VISIBLE);
@@ -180,8 +201,29 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             btnRight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //Intent intent = new Intent(view.getContext(), MainActivity.class);
-                    //view.getContext().startActivity(intent);
+                    Intent i = new Intent(getApplicationContext(), ImageComparatorActivity.class);
+                    i.putExtra("id", id);
+                    i.putExtra("lat", lat);
+                    i.putExtra("lng", lng);
+                    i.putExtra("name", name);
+                    i.putExtra("comment", comment);
+                    i.putExtra("description", description);
+                    i.putExtra("image", image);
+                    i.putExtra("year", year);
+                    i.putExtra("customImagePath", customImagePath);
+                    i.putExtra("customImageDate", customImageDate);
+                    i.putExtra("mode", mode);
+                    if (mode != null && mode.equals("fromMapsShowActivity")) {
+                        i.putExtra("country_ref", country_ref);
+                        i.putExtra("city_ref", city_ref);
+                        i.putExtra("monument_ref", monument_ref);
+                    }
+                    i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                    i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+                    i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                    i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
             btnRight.setVisibility(View.VISIBLE);
@@ -192,12 +234,12 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        for (ObservationPoint observationPoint : observationPoints) {
-            if (observationPoint.getMonumentRef().equals(monument_ref)) {
-                observationPointsFilteredMonument.add(observationPoint);
-            }
-        }
         if (mode.equals("fromMapsShowActivity")) {
+            for (ObservationPoint observationPoint : observationPoints) {
+                if (observationPoint.getMonumentRef().equals(monument_ref)) {
+                    observationPointsFilteredMonument.add(observationPoint);
+                }
+            }
             Intent i = new Intent(getApplicationContext(), MapsShowActivity.class);
             i.putExtra("monument_id", monument_ref);
             i.putExtra("country_ref", country_ref);

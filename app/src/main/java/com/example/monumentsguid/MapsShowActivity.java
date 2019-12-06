@@ -283,9 +283,14 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
-                view.getContext().startActivity(intent);
+                intent.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                intent.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
+                intent.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
+                intent.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
+                startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 mMap.clear();
+                mClusterManager.clearItems();
             }
         });
 
@@ -395,7 +400,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                     i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                     i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                     i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
-                    i.putParcelableArrayListExtra("observationPointsFiltered", (ArrayList<? extends Parcelable>) observationPointsFiltered);
                     i.putExtra("mode", "fromMapsShowActivity");
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
