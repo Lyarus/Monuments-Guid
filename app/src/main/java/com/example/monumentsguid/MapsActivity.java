@@ -71,7 +71,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final int DEFAULT_ZOOM = 17;
+    private static final int CLOSE_ZOOM = 17;
+    private static final int FAR_ZOOM = 10;
     private static final int RADIUS = 30;
     private LatLng mDefaultLocation;
 
@@ -119,8 +120,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean showPopupInfo;
     private String curId;
 
-    // The entry point to the Fused Location Provider.
-    private FusedLocationProviderClient mFusedLocationProviderClient;
     private boolean mLocationPermissionGranted;
 
     // The geographical location where the device is currently located. That is, the last-known location retrieved by the Fused Location Provider.
@@ -134,6 +133,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         getLocationPermission();
+
+        mDefaultLocation = new LatLng(51.098781, 17.036716);
 
         Intent intent = getIntent();
         latFromDetails = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
@@ -172,14 +173,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
         showPopupInfo = false;
-
-        // Retrieve location from saved instance state.
-        if (savedInstanceState != null) {
-            mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-        }
-
-        // Construct a FusedLocationProviderClient.
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -292,17 +285,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
         // Ustawienia lokalizacji urzadzenia
-
         updateLocationUI();
-        mOrigin = getMyLocation();
-        if (mOrigin != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
-        } else if (latFromDetails != 0.0 && lngFromDetails != 0.0) {
-            mDefaultLocation = new LatLng(latFromDetails, lngFromDetails);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+
+        if (latFromDetails != 0.0 && lngFromDetails != 0.0) {
+            mOrigin = new LatLng(latFromDetails, lngFromDetails);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, CLOSE_ZOOM));
         } else {
-            mDefaultLocation = new LatLng(51.098781, 17.036716);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, 10));
+            getMyLocation(FAR_ZOOM);
         }
 
         // Pozwala na uzywanie clusterow (liczy ile obiektow jest, a nie wyswietla wszystkie pinezki)
@@ -337,7 +326,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         @Override
                         public void onClick(View v) {
                             if (mDestination != null) {
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mDestination, DEFAULT_ZOOM));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mDestination, CLOSE_ZOOM));
                             }
                         }
                     });
@@ -403,8 +392,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         i.putExtra("image_exists", true);
                         startActivity(i);
                         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-
-                        // jeżeli jeszcze nie ma
                     } else {
                         // pokazuje popup ze wskazówką
                         curPopupMode = "prompt";
@@ -430,7 +417,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 // Klikniecie jezeli zabytek nie jest wybrany - rysuje trase
                 if (mDestination == null || !mDestination.equals(curPosition)) {
-                    mOrigin = getMyLocation();
+                    getMyLocation(CLOSE_ZOOM);
                     mDestination = curPosition;
                     if (mOrigin != null) {
                         drawRoute();
@@ -718,15 +705,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         updateLocationUI();
     }
 
-    private LatLng getMyLocation() {
+    private void getMyLocation(final int zoom) {
         // Getting LocationManager object from System Service LOCATION_SERVICE
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        // The entry point to the Fused Location Provider.
+        FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         LocationListener mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 mOrigin = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, DEFAULT_ZOOM));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, CLOSE_ZOOM));
                 if (mOrigin != null && mDestination != null) {
                     drawRoute();
                 }
@@ -760,13 +749,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
                                 mOrigin = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mOrigin, zoom));
                             }
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
                             mMap.animateCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+                                    .newLatLngZoom(mDefaultLocation, CLOSE_ZOOM));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
@@ -775,7 +765,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (SecurityException e) {
             Log.e("Exception: %s", Objects.requireNonNull(e.getMessage()));
         }
-        return mOrigin;
     }
 
     /**

@@ -362,6 +362,8 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), MapsActivity.class);
+                i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
+                i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
                 i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);
                 i.putParcelableArrayListExtra("observationPoints", (ArrayList<? extends Parcelable>) observationPoints);
                 i.putExtra("lat", lat);
