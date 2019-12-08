@@ -15,15 +15,8 @@ public class Image {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public Date getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
 }

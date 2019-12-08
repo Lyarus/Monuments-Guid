@@ -7,7 +7,7 @@ public class City implements Parcelable {
     public String id;
     public String name;
     public String image;
-    public String countryRef;
+    private String countryRef;
 
     public City() {
     }

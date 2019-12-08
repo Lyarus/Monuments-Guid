@@ -7,10 +7,10 @@ public class Monument implements Parcelable {
     public String id;
     public String name;
     public String image;
-    public String description;
-    public double latitude;
-    public double longitude;
-    public String cityRef;
+    private String description;
+    private double latitude;
+    private double longitude;
+    private String cityRef;
 
     public Monument() {
 

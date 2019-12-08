@@ -161,6 +161,7 @@ public class LoadingActivity extends AppCompatActivity {
                     }
                 });
         Task getObservationPointData = db.collection("observation_point")
+                .whereEqualTo("is_active", true)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -173,7 +174,7 @@ public class LoadingActivity extends AppCompatActivity {
                                 double lat = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLatitude();
                                 double lng = Objects.requireNonNull(document.getGeoPoint("lat_lng")).getLongitude();
                                 String year = document.getString("year");
-                                boolean isHorizontal = document.getBoolean("isHorizontal");
+                                boolean isHorizontal = document.getBoolean("is_horizontal");
                                 String monumentRef = document.getString("monument_ref");
                                 Image customImage = getImage(id);
                                 String customImagePath = null;

@@ -104,10 +104,6 @@ public class ObservationPoint implements Parcelable {
         return isHorizontal;
     }
 
-    public void setHorizontal(boolean horizontal) {
-        isHorizontal = horizontal;
-    }
-
     public void setCustomImagePath(String customImagePath) {
         this.customImagePath = customImagePath;
     }
