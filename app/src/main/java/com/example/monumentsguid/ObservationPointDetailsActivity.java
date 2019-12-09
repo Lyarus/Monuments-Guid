@@ -20,6 +20,8 @@ import com.example.monumentsguid.Entities.Monument;
 import com.example.monumentsguid.Entities.ObservationPoint;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,8 +29,9 @@ import java.util.Objects;
 public class ObservationPointDetailsActivity extends AppCompatActivity {
 
     // rozmiar ekranu urzadzenia
-    int screenHeight;
-    int screenWidth;
+    public int screenHeight;
+    public int screenWidth;
+    public int image_max_size;
 
     private String id;
     private String country_ref;
@@ -119,11 +122,15 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         if (customImagePath != null) {
             File file = new File(customImagePath);
             if (file.exists()) {
-                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-                Bitmap bitmap = BitmapFactory.decodeFile(customImagePath, bmOptions);
-                observationPointNewImage.setImageBitmap(bitmap);
+                try {
+                    observationPointNewImage.setImageBitmap(decodeFile(file));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         }
+
 
         observationPointNewDate.setText(newImageDateText);
 
@@ -276,5 +283,35 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             this.finish();
         }
 
+    }
+
+
+    protected Bitmap decodeFile(File f) throws IOException {
+        Bitmap b;
+
+        image_max_size = screenHeight / 3;
+
+        //Decode image size
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+
+        FileInputStream fis = new FileInputStream(f);
+        BitmapFactory.decodeStream(fis, null, o);
+        fis.close();
+
+        int scale = 1;
+        if (o.outHeight > image_max_size || o.outWidth > image_max_size) {
+            scale = (int) Math.pow(2, (int) Math.ceil(Math.log(image_max_size /
+                    (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
+        }
+
+        //Decode with inSampleSize
+        BitmapFactory.Options o2 = new BitmapFactory.Options();
+        o2.inSampleSize = scale;
+        fis = new FileInputStream(f);
+        b = BitmapFactory.decodeStream(fis, null, o2);
+        fis.close();
+
+        return b;
     }
 }
