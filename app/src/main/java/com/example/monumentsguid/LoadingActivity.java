@@ -78,9 +78,6 @@ public class LoadingActivity extends AppCompatActivity {
         paramsSpinner.width = spinnerSize;
         spinner.setVisibility(View.VISIBLE);
 
-        // znajduje moją lokalizację
-
-
         // pobiera wszystkie zdjęcie znajdujące się w dyrektorii
         String storagePath = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.example.monumentsguid/files/Pictures/";
         File file = new File(storagePath);

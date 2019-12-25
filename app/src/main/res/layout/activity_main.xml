@@ -35,7 +35,8 @@
         <LinearLayout
             android:id="@+id/main_icon_layout"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center">
 
             <ImageView
                 android:id="@+id/imageView"
@@ -43,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15sp"
                 android:contentDescription="@string/ikonka_aplikacji"
-                android:src="@drawable/default_monument" />
+                android:src="@drawable/ic_logo_full" />
         </LinearLayout>
 
         <LinearLayout

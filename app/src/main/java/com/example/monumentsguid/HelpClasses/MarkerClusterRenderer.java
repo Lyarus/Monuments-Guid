@@ -2,7 +2,10 @@ package com.example.monumentsguid.HelpClasses;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 
 import com.example.monumentsguid.R;
@@ -26,12 +29,33 @@ public class MarkerClusterRenderer extends DefaultClusterRenderer<ClusterItem> {
         mClusterIconGenerator = new IconGenerator(mContext.getApplicationContext());
     }
 
+    private static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+        Drawable drawable = AppCompatResources.getDrawable(context, drawableId);
+        Bitmap bitmap = null;
+        Canvas canvas;
+        if (drawable != null) {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        }
+        return bitmap;
+    }
+
     // tworzy widok pinezki zabytka
     @Override
     protected void onBeforeClusterItemRendered(ClusterItem item, MarkerOptions markerOptions) {
 
-        final BitmapDescriptor markerDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.pinezka);
-        markerOptions.icon(markerDescriptor).snippet(item.getSnippet());
+        Bitmap bitmap;
+        if (item.getCustomImagePath() == null) {
+            bitmap = getBitmapFromVectorDrawable(mContext, R.drawable.ic_marker_unknown);
+        } else {
+            bitmap = getBitmapFromVectorDrawable(mContext, R.drawable.ic_marker_default);
+        }
+        BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(bitmap);
+        markerOptions.icon(descriptor).snippet(item.getSnippet());
+        markerOptions.icon(descriptor);
     }
 
     // tworzy widok pinezki clustera

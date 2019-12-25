@@ -2,6 +2,7 @@ package com.example.monumentsguid.HelpClasses;
 
 import android.content.Context;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,7 +70,11 @@ public class ItemGridAdapter extends BaseAdapter {
             image.setImageResource(0);
         }
         if (image != null && isDefaultImage && gridItems.get(position).getImage() != null) {
-            new MapsActivity.DownloadImageTask(image).execute(gridItems.get(position).getImage());
+            try {
+                new MapsActivity.DownloadImageTask(image).execute(gridItems.get(position).getImage());
+            } catch (java.lang.NullPointerException e) {
+                Log.d("Background Task", e.toString());
+            }
         }
         if (gridItems.get(position).isActive()) {
             gridView.setBackgroundResource(R.drawable.rounded_corners_popup_blue);
