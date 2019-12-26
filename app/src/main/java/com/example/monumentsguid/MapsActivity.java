@@ -77,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int CLOSE_ZOOM = 17;
     private static final int FAR_ZOOM = 10;
-    private static final int RADIUS = 30;
+    private static final int RADIUS = 10;
     private LatLng mDefaultLocation;
 
     private GoogleMap mMap;
