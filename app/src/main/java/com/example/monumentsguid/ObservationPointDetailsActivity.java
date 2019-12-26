@@ -43,6 +43,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
     private String image;
     private String year;
     private String name;
+    private String monument_image;
     private String comment;
     private String description;
     private String customImagePath;
@@ -65,6 +66,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
         lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
         lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         name = Objects.requireNonNull(intent.getExtras()).getString("name");
+        monument_image = Objects.requireNonNull(intent.getExtras()).getString("monument_image");
         comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
         image = Objects.requireNonNull(intent.getExtras()).getString("image");
@@ -80,6 +82,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             country_ref = Objects.requireNonNull(intent.getExtras()).getString("country_ref");
             city_ref = Objects.requireNonNull(intent.getExtras()).getString("city_ref");
             monument_ref = Objects.requireNonNull(intent.getExtras()).getString("monument_ref");
+
         }
 
         observationPointsFilteredMonument = new ArrayList<>();
@@ -148,6 +151,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
                     i.putExtra("lat", lat);
                     i.putExtra("lng", lng);
                     i.putExtra("name", name);
+                    i.putExtra("monument_image", monument_image);
                     i.putExtra("comment", comment);
                     i.putExtra("description", description);
                     i.putExtra("image", image);
@@ -183,6 +187,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
                     i.putExtra("lat", lat);
                     i.putExtra("lng", lng);
                     i.putExtra("name", name);
+                    i.putExtra("monument_image", monument_image);
                     i.putExtra("comment", comment);
                     i.putExtra("description", description);
                     i.putExtra("image", image);
@@ -213,6 +218,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
                     i.putExtra("lat", lat);
                     i.putExtra("lng", lng);
                     i.putExtra("name", name);
+                    i.putExtra("monument_image", monument_image);
                     i.putExtra("comment", comment);
                     i.putExtra("description", description);
                     i.putExtra("image", image);
@@ -252,6 +258,7 @@ public class ObservationPointDetailsActivity extends AppCompatActivity {
             i.putExtra("country_ref", country_ref);
             i.putExtra("city_ref", city_ref);
             i.putExtra("name", name);
+            i.putExtra("monument_image", monument_image);
             i.putExtra("lat", lat);
             i.putExtra("lng", lng);
             i.putExtra("description", description);

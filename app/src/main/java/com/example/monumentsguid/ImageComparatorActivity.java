@@ -34,6 +34,7 @@ public class ImageComparatorActivity extends Activity {
     private boolean isHorizontal;
     private String year;
     private String name;
+    private String monument_image;
     private String comment;
     private String description;
     private String customImagePath;
@@ -53,6 +54,7 @@ public class ImageComparatorActivity extends Activity {
         lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
         lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         name = Objects.requireNonNull(intent.getExtras()).getString("name");
+        monument_image = Objects.requireNonNull(intent.getExtras()).getString("monument_image");
         comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
         image = Objects.requireNonNull(intent.getExtras()).getString("image");
@@ -111,6 +113,7 @@ public class ImageComparatorActivity extends Activity {
         i.putExtra("monument_ref", monument_ref);
         i.putExtra("comment", comment);
         i.putExtra("name", name);
+        i.putExtra("monument_image", monument_image);
         i.putExtra("description", description);
         i.putExtra("lat", lat);
         i.putExtra("lng", lng);

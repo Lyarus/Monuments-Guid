@@ -68,7 +68,7 @@ public class MonumentActivity extends AppCompatActivity {
             i.putExtra("lat", monumentLat.get(position));
             i.putExtra("lng", monumentLng.get(position));
             i.putExtra("description", monumentDescription.get(position));
-            i.putExtra("image", monumentImages.get(position));
+            i.putExtra("monument_image", monumentImages.get(position));
             i.putParcelableArrayListExtra("countries", (ArrayList<? extends Parcelable>) countries);
             i.putParcelableArrayListExtra("cities", (ArrayList<? extends Parcelable>) cities);
             i.putParcelableArrayListExtra("monuments", (ArrayList<? extends Parcelable>) monuments);

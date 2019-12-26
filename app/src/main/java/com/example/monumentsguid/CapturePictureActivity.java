@@ -51,6 +51,7 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
     private String image;
     private String year;
     private String name;
+    private String monument_image;
     private String comment;
     private String description;
     private boolean image_exists;
@@ -69,6 +70,7 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
         lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
         lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         name = Objects.requireNonNull(intent.getExtras()).getString("name");
+        monument_image = Objects.requireNonNull(intent.getExtras()).getString("monument_image");
         comment = Objects.requireNonNull(intent.getExtras()).getString("comment");
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
         image = Objects.requireNonNull(intent.getExtras()).getString("image");
@@ -107,6 +109,7 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
                 i.putExtra("lat", lat);
                 i.putExtra("lng", lng);
                 i.putExtra("name", name);
+                i.putExtra("monument_image", monument_image);
                 i.putExtra("comment", comment);
                 i.putExtra("description", description);
                 i.putExtra("image", image);
@@ -129,6 +132,7 @@ public class CapturePictureActivity extends AppCompatActivity implements EasyPer
                     i.putExtra("lat", lat);
                     i.putExtra("lng", lng);
                     i.putExtra("name", name);
+                    i.putExtra("monument_image", monument_image);
                     i.putExtra("comment", comment);
                     i.putExtra("description", description);
                     i.putExtra("image", image);

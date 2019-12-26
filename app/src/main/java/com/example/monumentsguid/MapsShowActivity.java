@@ -96,7 +96,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
         double lat = Objects.requireNonNull(intent.getExtras()).getDouble("lat");
         double lng = Objects.requireNonNull(intent.getExtras()).getDouble("lng");
         description = Objects.requireNonNull(intent.getExtras()).getString("description");
-        monument_image = Objects.requireNonNull(intent.getExtras()).getString("image");
+        monument_image = Objects.requireNonNull(intent.getExtras()).getString("monument_image");
         if (monument_image != null && monument_image.equals("")) {
             monument_image = null;
         }
@@ -234,7 +234,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
 
             if (inflater != null) {
                 customView = inflater.inflate(R.layout.popup_info, null);
-                createBottomBtns(btnLeft, btnCenter, btnRight, curId, curComment, curLat, curLng, name, monument_image, description, curImage, curYear, curCustomImagePath, curCustomImageDate, customView);
+                createBottomBtns(btnLeft, btnCenter, btnRight, curId, curComment, curLat, curLng, name, description, curImage, curYear, curCustomImagePath, curCustomImageDate, customView);
                 setPopupWindowContent(customView, popupWidth, popupHeight, name, monument_image, description, btnLeft, btnRight, btnCenter);
             }
         }
@@ -321,7 +321,6 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                             String id = ClusterItem.getId();
                             String name = ClusterItem.getName();
                             String comment = ClusterItem.getComment();
-                            String monument_image = ClusterItem.getMonument_image();
                             String description = ClusterItem.getDescription();
                             double lat = ClusterItem.getPosition().latitude;
                             double lng = ClusterItem.getPosition().longitude;
@@ -343,7 +342,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                             View customView;
                             if (inflater != null) {
                                 customView = inflater.inflate(R.layout.popup_info, null);
-                                createBottomBtns(btnLeft, btnCenter, btnRight, id, comment, lat, lng, name, monument_image, description, image, year, customImagePath, customImageDate, customView);
+                                createBottomBtns(btnLeft, btnCenter, btnRight, id, comment, lat, lng, name, description, image, year, customImagePath, customImageDate, customView);
                             }
                         }
                     });
@@ -353,7 +352,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     /**
      * Tworzy dolne przyciski
      */
-    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final String id, final String comment, final double lat, final double lng, final String name, final String monument_image, final String description, final String image, final String year, final String customImagePath, final String customImageDate, final View customView) {
+    private void createBottomBtns(final Button btnLeft, final Button btnCenter, final Button btnRight, final String id, final String comment, final double lat, final double lng, final String name, final String description, final String image, final String year, final String customImagePath, final String customImageDate, final View customView) {
         // Wstawia wartosc prycisku Wybierz - pokazuje pzycisk
         final ViewGroup.LayoutParams paramsWybierz = btnRight.getLayoutParams();
         paramsWybierz.width = btnBottomWidth;
@@ -391,6 +390,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
                     i.putExtra("monument_ref", monument_ref);
                     i.putExtra("comment", comment);
                     i.putExtra("name", name);
+                    i.putExtra("monument_image", monument_image);
                     i.putExtra("description", description);
                     i.putExtra("lat", lat);
                     i.putExtra("lng", lng);
@@ -430,7 +430,7 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
     /**
      * Tworzy popup z informacja o zabytku
      */
-    private void setPopupWindowContent(View view, int width, int height, String title, String image, String description, Button btnLeft, Button btnRight, Button btnCenter) {
+    private void setPopupWindowContent(View view, int width, int height, String title, String monument_image, String description, Button btnLeft, Button btnRight, Button btnCenter) {
         // Tworzy popup
         mPopupWindow = new PopupWindow(view, width, height);
         mPopupWindow.setElevation(5.0f);
@@ -454,8 +454,8 @@ public class MapsShowActivity extends FragmentActivity implements OnMapReadyCall
             ViewGroup.LayoutParams params = imageLayout.getLayoutParams();
             params.height = imageLayoutHeight;
             imageLayout.setLayoutParams(params);
-            if (image != null) {
-                new MapsActivity.DownloadImageTask(infoImage).execute(image);
+            if (monument_image != null) {
+                new MapsActivity.DownloadImageTask(infoImage).execute(monument_image);
             }
             // Wstawia opis
             infoDescription.setText(description);
